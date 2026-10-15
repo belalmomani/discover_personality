@@ -1,6 +1,6 @@
 # بناء APK سحابيًا
 
-الـ workflow: `.github/workflows/android-build.yml` (Java 17، Flutter 3.27.4 مثبّت، ويرفع patch_android.py إصدار AGP إلى 8.7.3 وGradle إلى 8.9 وcompileSdk إلى 36 لأن Start.io SDK 5.4.0 يتطلب ذلك): scaffold ← patch ← `pub get` ← format check ← analyze ← test ← `flutter build apk --release` ← رفع `build/app/outputs/flutter-apk/app-release.apk`.
+الـ workflow: `.github/workflows/android-build.yml` (Java 17، Flutter 3.27.4 مثبّت، ويرفع patch_android.py إصدار AGP إلى 8.7.3 وGradle إلى 8.9 وcompileSdk إلى 36 وminSdk إلى 23 وNDK إلى 27.0.12077973 لأن Start.io SDK 5.4.0 يتطلب ذلك): scaffold ← patch ← `pub get` ← format check ← analyze ← test ← `flutter build apk --release` ← رفع `build/app/outputs/flutter-apk/app-release.apk`.
 
 ملاحظات صريحة:
 - **لم يُنفَّذ البناء من قبل المؤلف** (بيئة بلا Flutter وبلا إنترنت). قد يحتاج التشغيل الأول إلى إصلاحات صغيرة؛ أرسل سجل الخطأ.

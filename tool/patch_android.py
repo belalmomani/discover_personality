@@ -50,3 +50,8 @@ sub_file("android/gradle/wrapper/gradle-wrapper.properties",
          r'gradle-[0-9.]+-(all|bin)\.zip', r'gradle-8.9-all.zip', "Gradle 8.9")
 for bf in ("android/app/build.gradle", "android/app/build.gradle.kts"):
     sub_file(bf, r'compileSdk(Version)?\s*=?\s*(flutter\.compileSdkVersion|\d+)', 'compileSdk = 36', "compileSdk 36")
+
+# minSdk 23 (required by com.startapp:inapp-sdk 5.4.0) and NDK 27 (required by several plugins).
+for bf in ("android/app/build.gradle", "android/app/build.gradle.kts"):
+    sub_file(bf, r'minSdk(Version)?\s*=?\s*(flutter\.minSdkVersion|\d+)', 'minSdk = 23', "minSdk 23")
+    sub_file(bf, r'ndkVersion\s*=?\s*(flutter\.ndkVersion|"[^"]*")', 'ndkVersion = "27.0.12077973"', "NDK 27")
