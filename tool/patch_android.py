@@ -55,3 +55,7 @@ for bf in ("android/app/build.gradle", "android/app/build.gradle.kts"):
 for bf in ("android/app/build.gradle", "android/app/build.gradle.kts"):
     sub_file(bf, r'minSdk(Version)?\s*=?\s*(flutter\.minSdkVersion|\d+)', 'minSdk = 23', "minSdk 23")
     sub_file(bf, r'ndkVersion\s*=?\s*(flutter\.ndkVersion|"[^"]*")', 'ndkVersion = "27.0.12077973"', "NDK 27")
+
+# Kotlin Gradle plugin: the template's 1.8.22 cannot read kotlin-stdlib 2.4 pulled in by newer plugins.
+for sf in ("android/settings.gradle", "android/settings.gradle.kts"):
+    sub_file(sf, r'(org\.jetbrains\.kotlin\.android"\)?\s*version\s*"?)[0-9.]+', r'\g<1>2.3.0', "Kotlin 2.3.0")
