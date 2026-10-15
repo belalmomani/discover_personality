@@ -33,3 +33,20 @@ if "com.startapp.sdk.APPLICATION_ID" not in s:
 
 open(path, "w", encoding="utf-8").write(s)
 print("patched", path, "(Start.io app id:", "set" if app_id != "YOUR_STARTIO_APP_ID" else "PLACEHOLDER", ")")
+
+# ---- Build tooling bump: startapp's native SDK (com.startapp:inapp-sdk 5.4.0) requires compileSdk 36,
+# which needs a newer Android Gradle Plugin / Gradle than the Flutter 3.27.4 template (AGP 8.1.0, Gradle 8.3).
+def sub_file(p, pattern, repl, label):
+    if not os.path.exists(p):
+        print("skip (missing):", p); return
+    t = open(p, encoding="utf-8").read()
+    n, c = re.subn(pattern, repl, t)
+    open(p, "w", encoding="utf-8").write(n)
+    print(label, "->", "changed" if c else "no match (already ok?)", p)
+
+for sf in ("android/settings.gradle", "android/settings.gradle.kts"):
+    sub_file(sf, r'(com\.android\.application"\)?\s*version\s*"?)[0-9.]+', r'\g<1>8.7.3', "AGP 8.7.3")
+sub_file("android/gradle/wrapper/gradle-wrapper.properties",
+         r'gradle-[0-9.]+-(all|bin)\.zip', r'gradle-8.9-all.zip', "Gradle 8.9")
+for bf in ("android/app/build.gradle", "android/app/build.gradle.kts"):
+    sub_file(bf, r'compileSdk(Version)?\s*=?\s*(flutter\.compileSdkVersion|\d+)', 'compileSdk = 36', "compileSdk 36")
