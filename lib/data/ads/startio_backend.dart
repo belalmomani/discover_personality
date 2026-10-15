@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:startapp_sdk/startapp_sdk.dart';
+import 'package:startapp_sdk/startapp.dart';
 
 import 'ad_backend.dart';
 

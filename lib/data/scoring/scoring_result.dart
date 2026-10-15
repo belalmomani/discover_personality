@@ -1,4 +1,4 @@
-/// Immutable, JSON-serialisable results produced by [ScoringEngine].
+// Immutable, JSON-serialisable results produced by [ScoringEngine].
 
 class MbtiPairResult {
   const MbtiPairResult({

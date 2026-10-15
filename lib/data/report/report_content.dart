@@ -1,5 +1,5 @@
-/// Static Arabic content used by the local report/plan generators.
-/// Descriptions are tentative interpretations, never diagnoses.
+// Static Arabic content used by the local report/plan generators.
+// Descriptions are tentative interpretations, never diagnoses.
 
 class PoleInfo {
   const PoleInfo(this.name, this.description, this.strength, this.challenge);
