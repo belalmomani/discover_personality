@@ -1,0 +1,604 @@
+{
+ "version": 1,
+ "locale": "ar",
+ "scale": [
+  {
+   "value": 1,
+   "label": "لا ينطبق علي إطلاقًا"
+  },
+  {
+   "value": 2,
+   "label": "ينطبق علي بدرجة قليلة"
+  },
+  {
+   "value": 3,
+   "label": "ينطبق علي بدرجة متوسطة"
+  },
+  {
+   "value": 4,
+   "label": "ينطبق علي بدرجة كبيرة"
+  },
+  {
+   "value": 5,
+   "label": "ينطبق علي تمامًا"
+  }
+ ],
+ "questions": [
+  {
+   "id": 1,
+   "system": "mbti",
+   "dimension": "E",
+   "topic": "",
+   "reverse": false,
+   "text": "أشعر بالنشاط عندما أتفاعل مع مجموعة من الناس."
+  },
+  {
+   "id": 2,
+   "system": "mbti",
+   "dimension": "E",
+   "topic": "",
+   "reverse": false,
+   "text": "أحب التعبير عن أفكاري بصوت مسموع أثناء النقاش."
+  },
+  {
+   "id": 3,
+   "system": "mbti",
+   "dimension": "E",
+   "topic": "",
+   "reverse": false,
+   "text": "أستمتع بالتعرف على أشخاص جدد والمشاركة في الأنشطة الاجتماعية."
+  },
+  {
+   "id": 4,
+   "system": "mbti",
+   "dimension": "I",
+   "topic": "",
+   "reverse": false,
+   "text": "أحتاج إلى وقت منفرد بعد الاختلاط بالناس لاستعادة طاقتي."
+  },
+  {
+   "id": 5,
+   "system": "mbti",
+   "dimension": "I",
+   "topic": "",
+   "reverse": false,
+   "text": "أفضل التفكير في أفكاري وحدي قبل مشاركتها."
+  },
+  {
+   "id": 6,
+   "system": "mbti",
+   "dimension": "I",
+   "topic": "",
+   "reverse": false,
+   "text": "أفضل العلاقات القليلة والعميقة على التعارف الواسع."
+  },
+  {
+   "id": 7,
+   "system": "mbti",
+   "dimension": "S",
+   "topic": "",
+   "reverse": false,
+   "text": "أركز على الحقائق والتفاصيل التي يمكن التحقق منها."
+  },
+  {
+   "id": 8,
+   "system": "mbti",
+   "dimension": "S",
+   "topic": "",
+   "reverse": false,
+   "text": "أفضل التعليمات العملية الواضحة على الأفكار المجردة."
+  },
+  {
+   "id": 9,
+   "system": "mbti",
+   "dimension": "S",
+   "topic": "",
+   "reverse": false,
+   "text": "أعتمد على الخبرة السابقة عند التعامل مع مشكلة جديدة."
+  },
+  {
+   "id": 10,
+   "system": "mbti",
+   "dimension": "N",
+   "topic": "",
+   "reverse": false,
+   "text": "أبحث عن الأنماط والروابط الخفية بين المعلومات."
+  },
+  {
+   "id": 11,
+   "system": "mbti",
+   "dimension": "N",
+   "topic": "",
+   "reverse": false,
+   "text": "أستمتع بتخيل احتمالات مستقبلية لم تتحقق بعد."
+  },
+  {
+   "id": 12,
+   "system": "mbti",
+   "dimension": "N",
+   "topic": "",
+   "reverse": false,
+   "text": "أركز على الصورة الكبيرة أكثر من التفاصيل اليومية."
+  },
+  {
+   "id": 13,
+   "system": "mbti",
+   "dimension": "T",
+   "topic": "",
+   "reverse": false,
+   "text": "أقيّم القرار بناءً على الأدلة والمنطق حتى عندما يكون غير مريح."
+  },
+  {
+   "id": 14,
+   "system": "mbti",
+   "dimension": "T",
+   "topic": "",
+   "reverse": false,
+   "text": "أفضل تطبيق معايير متسقة على الحالات المتشابهة."
+  },
+  {
+   "id": 15,
+   "system": "mbti",
+   "dimension": "T",
+   "topic": "",
+   "reverse": false,
+   "text": "عند الخلاف، أركز على قوة الحجج أكثر من مشاعر أصحابها."
+  },
+  {
+   "id": 16,
+   "system": "mbti",
+   "dimension": "F",
+   "topic": "",
+   "reverse": false,
+   "text": "أراعي أثر القرار في الناس وعلاقاتهم عند المفاضلة بين الخيارات."
+  },
+  {
+   "id": 17,
+   "system": "mbti",
+   "dimension": "F",
+   "topic": "",
+   "reverse": false,
+   "text": "أعتبر القيم الشخصية والإنصاف الإنساني جزءًا أساسيًا من القرار."
+  },
+  {
+   "id": 18,
+   "system": "mbti",
+   "dimension": "F",
+   "topic": "",
+   "reverse": false,
+   "text": "أحاول فهم وجهات نظر الأشخاص ومشاعرهم قبل حسم الخلاف."
+  },
+  {
+   "id": 19,
+   "system": "mbti",
+   "dimension": "J",
+   "topic": "",
+   "reverse": false,
+   "text": "أفضل تحديد خطة ومواعيد واضحة قبل بدء المشروع."
+  },
+  {
+   "id": 20,
+   "system": "mbti",
+   "dimension": "J",
+   "topic": "",
+   "reverse": false,
+   "text": "أشعر بالارتياح عندما أحسم القرارات بدل إبقائها مفتوحة."
+  },
+  {
+   "id": 21,
+   "system": "mbti",
+   "dimension": "J",
+   "topic": "",
+   "reverse": false,
+   "text": "أنجز عادةً الأعمال المطلوبة قبل الموعد النهائي."
+  },
+  {
+   "id": 22,
+   "system": "mbti",
+   "dimension": "P",
+   "topic": "",
+   "reverse": false,
+   "text": "أفضل إبقاء الخيارات مفتوحة حتى تظهر معلومات جديدة."
+  },
+  {
+   "id": 23,
+   "system": "mbti",
+   "dimension": "P",
+   "topic": "",
+   "reverse": false,
+   "text": "أستمتع بتغيير خطتي عندما أكتشف طريقة أفضل."
+  },
+  {
+   "id": 24,
+   "system": "mbti",
+   "dimension": "P",
+   "topic": "",
+   "reverse": false,
+   "text": "أعمل بكفاءة عندما أستطيع التكيف مع الظروف بدل اتباع جدول ثابت."
+  },
+  {
+   "id": 25,
+   "system": "enneagram",
+   "dimension": "1",
+   "topic": "السعي للصواب والإتقان",
+   "reverse": false,
+   "text": "يزعجني أن أرى خطأ يمكن إصلاحه ثم أتركه دون محاولة."
+  },
+  {
+   "id": 26,
+   "system": "enneagram",
+   "dimension": "1",
+   "topic": "السعي للصواب والإتقان",
+   "reverse": false,
+   "text": "أضع لنفسي معايير عالية بشأن ما أعتبره صحيحًا."
+  },
+  {
+   "id": 27,
+   "system": "enneagram",
+   "dimension": "1",
+   "topic": "السعي للصواب والإتقان",
+   "reverse": false,
+   "text": "يصعب عليّ تجاهل ما أراه تقصيرًا أو إهمالًا."
+  },
+  {
+   "id": 28,
+   "system": "enneagram",
+   "dimension": "1",
+   "topic": "السعي للصواب والإتقان",
+   "reverse": false,
+   "text": "أراجع تصرفاتي كثيرًا لأتأكد من أنني تصرفت بطريقة صحيحة."
+  },
+  {
+   "id": 29,
+   "system": "enneagram",
+   "dimension": "2",
+   "topic": "العطاء والاهتمام بالآخرين",
+   "reverse": false,
+   "text": "أشعر بقيمة خاصة عندما يحتاج الآخرون إلى مساعدتي."
+  },
+  {
+   "id": 30,
+   "system": "enneagram",
+   "dimension": "2",
+   "topic": "العطاء والاهتمام بالآخرين",
+   "reverse": false,
+   "text": "أبذل جهدًا لمساندة الآخرين حتى عندما يكون وقتي محدودًا."
+  },
+  {
+   "id": 31,
+   "system": "enneagram",
+   "dimension": "2",
+   "topic": "العطاء والاهتمام بالآخرين",
+   "reverse": false,
+   "text": "قد أتأثر عندما لا يقدّر الآخرون ما أقدمه لهم."
+  },
+  {
+   "id": 32,
+   "system": "enneagram",
+   "dimension": "2",
+   "topic": "العطاء والاهتمام بالآخرين",
+   "reverse": false,
+   "text": "ألاحظ احتياجات الناس العاطفية حتى عندما لا يصرحون بها."
+  },
+  {
+   "id": 33,
+   "system": "enneagram",
+   "dimension": "3",
+   "topic": "الإنجاز والكفاءة",
+   "reverse": false,
+   "text": "يهمني أن أحقق نتائج ملموسة يمكنني إثباتها."
+  },
+  {
+   "id": 34,
+   "system": "enneagram",
+   "dimension": "3",
+   "topic": "الإنجاز والكفاءة",
+   "reverse": false,
+   "text": "أشعر بالرضا عندما يراني الآخرون شخصًا كفؤًا وناجحًا."
+  },
+  {
+   "id": 35,
+   "system": "enneagram",
+   "dimension": "3",
+   "topic": "الإنجاز والكفاءة",
+   "reverse": false,
+   "text": "أميل إلى قياس تقدمي من خلال الأهداف التي أنجزتها."
+  },
+  {
+   "id": 36,
+   "system": "enneagram",
+   "dimension": "3",
+   "topic": "الإنجاز والكفاءة",
+   "reverse": false,
+   "text": "قد أشعر بعدم الارتياح عندما أبدو أقل نجاحًا مما أطمح إليه."
+  },
+  {
+   "id": 37,
+   "system": "enneagram",
+   "dimension": "4",
+   "topic": "الأصالة والعمق العاطفي",
+   "reverse": false,
+   "text": "أحتاج إلى الشعور بأن هويتي تعبر عني فعلًا، لا أن تكون نسخة من الآخرين."
+  },
+  {
+   "id": 38,
+   "system": "enneagram",
+   "dimension": "4",
+   "topic": "الأصالة والعمق العاطفي",
+   "reverse": false,
+   "text": "أهتم بفهم مشاعري وتجربتي الداخلية بعمق."
+  },
+  {
+   "id": 39,
+   "system": "enneagram",
+   "dimension": "4",
+   "topic": "الأصالة والعمق العاطفي",
+   "reverse": false,
+   "text": "أشعر بالضيق عندما تبدو حياتي خالية من المعنى الشخصي."
+  },
+  {
+   "id": 40,
+   "system": "enneagram",
+   "dimension": "4",
+   "topic": "الأصالة والعمق العاطفي",
+   "reverse": false,
+   "text": "أفضل التعبير عن ذاتي بطريقة أصيلة حتى لو لم تكن شائعة."
+  },
+  {
+   "id": 41,
+   "system": "enneagram",
+   "dimension": "5",
+   "topic": "المعرفة وحماية الطاقة",
+   "reverse": false,
+   "text": "أحتاج إلى فهم الموضوع جيدًا قبل أن أشعر بالاستعداد للتعامل معه."
+  },
+  {
+   "id": 42,
+   "system": "enneagram",
+   "dimension": "5",
+   "topic": "المعرفة وحماية الطاقة",
+   "reverse": false,
+   "text": "أحرص على حماية وقتي وطاقتي من المطالب المتكررة."
+  },
+  {
+   "id": 43,
+   "system": "enneagram",
+   "dimension": "5",
+   "topic": "المعرفة وحماية الطاقة",
+   "reverse": false,
+   "text": "أفضل الاعتماد على معرفتي وتحليلي قبل طلب مساعدة الآخرين."
+  },
+  {
+   "id": 44,
+   "system": "enneagram",
+   "dimension": "5",
+   "topic": "المعرفة وحماية الطاقة",
+   "reverse": false,
+   "text": "أشعر بالارتياح عندما أفهم كيف يعمل الشيء من الداخل."
+  },
+  {
+   "id": 45,
+   "system": "enneagram",
+   "dimension": "6",
+   "topic": "الحذر والأمان",
+   "reverse": false,
+   "text": "أفكر في المخاطر المحتملة قبل الالتزام بقرار مهم."
+  },
+  {
+   "id": 46,
+   "system": "enneagram",
+   "dimension": "6",
+   "topic": "الحذر والأمان",
+   "reverse": false,
+   "text": "أبحث عن مصادر موثوقة أستطيع الاعتماد عليها عند الشك."
+  },
+  {
+   "id": 47,
+   "system": "enneagram",
+   "dimension": "6",
+   "topic": "الحذر والأمان",
+   "reverse": false,
+   "text": "يهمني أن أعرف ما إذا كان الأشخاص الذين أعتمد عليهم جديرين بالثقة."
+  },
+  {
+   "id": 48,
+   "system": "enneagram",
+   "dimension": "6",
+   "topic": "الحذر والأمان",
+   "reverse": false,
+   "text": "أستعد للسيناريوهات الصعبة حتى لا أُفاجأ بها."
+  },
+  {
+   "id": 49,
+   "system": "enneagram",
+   "dimension": "7",
+   "topic": "التنوع والتجارب الجديدة",
+   "reverse": false,
+   "text": "أبحث باستمرار عن تجارب وأفكار جديدة تثير اهتمامي."
+  },
+  {
+   "id": 50,
+   "system": "enneagram",
+   "dimension": "7",
+   "topic": "التنوع والتجارب الجديدة",
+   "reverse": false,
+   "text": "أحب أن تكون أمامي خيارات متعددة بدل الالتزام بمسار واحد مبكرًا."
+  },
+  {
+   "id": 51,
+   "system": "enneagram",
+   "dimension": "7",
+   "topic": "التنوع والتجارب الجديدة",
+   "reverse": false,
+   "text": "عندما أواجه تجربة مزعجة، أميل إلى البحث عن شيء جديد يشغلني عنها."
+  },
+  {
+   "id": 52,
+   "system": "enneagram",
+   "dimension": "7",
+   "topic": "التنوع والتجارب الجديدة",
+   "reverse": false,
+   "text": "أفقد اهتمامي أحيانًا بالمشروع عندما يصبح روتينيًا أو مقيدًا."
+  },
+  {
+   "id": 53,
+   "system": "enneagram",
+   "dimension": "8",
+   "topic": "القوة والاستقلال",
+   "reverse": false,
+   "text": "أفضل مواجهة المشكلة مباشرة بدل ترك الآخرين يقررون عني."
+  },
+  {
+   "id": 54,
+   "system": "enneagram",
+   "dimension": "8",
+   "topic": "القوة والاستقلال",
+   "reverse": false,
+   "text": "يزعجني أن أشعر بأن شخصًا آخر يفرض سيطرته عليّ."
+  },
+  {
+   "id": 55,
+   "system": "enneagram",
+   "dimension": "8",
+   "topic": "القوة والاستقلال",
+   "reverse": false,
+   "text": "أستطيع الدفاع عن موقفي حتى عندما أواجه معارضة قوية."
+  },
+  {
+   "id": 56,
+   "system": "enneagram",
+   "dimension": "8",
+   "topic": "القوة والاستقلال",
+   "reverse": false,
+   "text": "أميل إلى إخفاء نقاط ضعفي عندما أخشى أن يستغلها الآخرون."
+  },
+  {
+   "id": 57,
+   "system": "enneagram",
+   "dimension": "9",
+   "topic": "الانسجام والسلام الداخلي",
+   "reverse": false,
+   "text": "أفضل الحفاظ على الهدوء بدل الدخول في خلاف لا أراه ضروريًا."
+  },
+  {
+   "id": 58,
+   "system": "enneagram",
+   "dimension": "9",
+   "topic": "الانسجام والسلام الداخلي",
+   "reverse": false,
+   "text": "قد أؤجل التعبير عن رأيي إذا توقعت أن يسبب توترًا."
+  },
+  {
+   "id": 59,
+   "system": "enneagram",
+   "dimension": "9",
+   "topic": "الانسجام والسلام الداخلي",
+   "reverse": false,
+   "text": "أجد صعوبة أحيانًا في تحديد ما أريده عندما تتعارض رغباتي مع رغبات الآخرين."
+  },
+  {
+   "id": 60,
+   "system": "enneagram",
+   "dimension": "9",
+   "topic": "الانسجام والسلام الداخلي",
+   "reverse": false,
+   "text": "أشعر بالارتياح عندما تسير الأمور بانسجام واستقرار."
+  },
+  {
+   "id": 61,
+   "system": "arfd",
+   "dimension": "A",
+   "topic": "التحليل",
+   "reverse": false,
+   "text": "أقارن عدة خيارات قبل اتخاذ القرارات المهمة."
+  },
+  {
+   "id": 62,
+   "system": "arfd",
+   "dimension": "A",
+   "topic": "التحليل",
+   "reverse": false,
+   "text": "أستطيع تحديد المعلومات الناقصة التي أحتاج إليها قبل البدء."
+  },
+  {
+   "id": 63,
+   "system": "arfd",
+   "dimension": "A",
+   "topic": "التحليل",
+   "reverse": true,
+   "text": "أحيانًا أستمر في التفكير والتحليل حتى بعد أن تصبح المعلومات كافية لاتخاذ خطوة أولى."
+  },
+  {
+   "id": 64,
+   "system": "arfd",
+   "dimension": "R",
+   "topic": "إدارة المخاطر",
+   "reverse": false,
+   "text": "أختبر الفكرة على نطاق صغير قبل استثمار موارد كبيرة فيها."
+  },
+  {
+   "id": 65,
+   "system": "arfd",
+   "dimension": "R",
+   "topic": "إدارة المخاطر",
+   "reverse": false,
+   "text": "أستطيع قبول خسارة محدودة إذا كانت محسوبة ومقبولة بالنسبة إليّ."
+  },
+  {
+   "id": 66,
+   "system": "arfd",
+   "dimension": "R",
+   "topic": "إدارة المخاطر",
+   "reverse": true,
+   "text": "أتجنب الفرص الجديدة عندما لا أضمن نجاحها."
+  },
+  {
+   "id": 67,
+   "system": "arfd",
+   "dimension": "F",
+   "topic": "التنفيذ والاستمرارية",
+   "reverse": false,
+   "text": "أحول أفكاري إلى مهام محددة ومواعيد واضحة."
+  },
+  {
+   "id": 68,
+   "system": "arfd",
+   "dimension": "F",
+   "topic": "التنفيذ والاستمرارية",
+   "reverse": false,
+   "text": "أستمر في العمل على أهدافي حتى عندما ينخفض حماسي."
+  },
+  {
+   "id": 69,
+   "system": "arfd",
+   "dimension": "F",
+   "topic": "التنفيذ والاستمرارية",
+   "reverse": true,
+   "text": "أبدأ مشاريع جديدة قبل إكمال المشاريع التي سبقتها."
+  },
+  {
+   "id": 70,
+   "system": "arfd",
+   "dimension": "D",
+   "topic": "دوافع الإنجاز",
+   "reverse": false,
+   "text": "أفضل الأعمال التي تمنحني استقلالية أكبر في قراراتي."
+  },
+  {
+   "id": 71,
+   "system": "arfd",
+   "dimension": "D",
+   "topic": "دوافع الإنجاز",
+   "reverse": false,
+   "text": "أستمد الرضا من تحقيق أهداف يمكن قياسها بوضوح."
+  },
+  {
+   "id": 72,
+   "system": "arfd",
+   "dimension": "D",
+   "topic": "دوافع الإنجاز",
+   "reverse": true,
+   "text": "أختار أحيانًا ما يبدو ناجحًا للآخرين بدل ما يتوافق مع أولوياتي الحقيقية."
+  }
+ ]
+}
