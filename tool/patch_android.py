@@ -10,7 +10,7 @@ path = "android/app/src/main/AndroidManifest.xml"
 if not os.path.exists(path):
     sys.exit("AndroidManifest.xml not found: run flutter create first")
 s = open(path, encoding="utf-8").read()
-app_id = os.environ.get("STARTIO_APP_ID", "").strip() or "YOUR_STARTIO_APP_ID"
+app_id = os.environ.get("STARTIO_APP_ID", "").strip() or "209978600"
 
 if "android.permission.INTERNET" not in s:
     s = s.replace("<application", '<uses-permission android:name="android.permission.INTERNET"/>\n    <application', 1)
@@ -59,3 +59,35 @@ for bf in ("android/app/build.gradle", "android/app/build.gradle.kts"):
 # Kotlin Gradle plugin: the template's 1.8.22 cannot read kotlin-stdlib 2.4 pulled in by newer plugins.
 for sf in ("android/settings.gradle", "android/settings.gradle.kts"):
     sub_file(sf, r'(org\.jetbrains\.kotlin\.android"\)?\s*version\s*"?)[0-9.]+', r'\g<1>2.3.0', "Kotlin 2.3.0")
+
+# ---- Release signing (only when android/key.properties exists; otherwise the debug key is kept)
+if os.path.exists("android/key.properties"):
+    for bf in ("android/app/build.gradle",):
+        if not os.path.exists(bf):
+            continue
+        g = open(bf, encoding="utf-8").read()
+        if "keystoreProperties" not in g:
+            loader = (
+                "def keystoreProperties = new Properties()\n"
+                "def keystorePropertiesFile = rootProject.file('key.properties')\n"
+                "if (keystorePropertiesFile.exists()) {\n"
+                "    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))\n"
+                "}\n\n"
+            )
+            g = g.replace("android {", loader + "android {", 1)
+            signing = (
+                "    signingConfigs {\n"
+                "        release {\n"
+                "            keyAlias keystoreProperties['keyAlias']\n"
+                "            keyPassword keystoreProperties['keyPassword']\n"
+                "            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null\n"
+                "            storePassword keystoreProperties['storePassword']\n"
+                "        }\n"
+                "    }\n\n"
+            )
+            g = g.replace("    buildTypes {", signing + "    buildTypes {", 1)
+            g = re.sub(r"signingConfig\s*=?\s*signingConfigs\.debug", "signingConfig = signingConfigs.release", g)
+            open(bf, "w", encoding="utf-8").write(g)
+            print("release signing configured in", bf)
+        else:
+            print("release signing already configured")

@@ -15,3 +15,7 @@
 - المواضع: Banner في الرئيسية والنتائج، وInterstitial عند مغادرة شاشة النتائج فقط (حد أقصى 2 للجلسة وبفارق 3 دقائق). لا إعلانات أثناء الأسئلة (يفرضها `AdService` ويختبرها `test/unit/ad_service_test.dart`).
 - إدارة الموافقة الإعلانية (GDPR/UMP وغيرها) ومتطلبات Google Play (Data safety، سياسة الخصوصية) **لم تُنفذ** وعليك مراجعتها قبل التفعيل؛ عدّل سياسة الخصوصية.
 - لم تُجرَّب الإعلانات على جهاز. الإعدادات الاختيارية Return/Splash ads معطلة في الـ manifest.
+
+## App ID الحالي
+`209978600` هو المعرّف الافتراضي في `tool/patch_android.py` (المعرّف ليس سريًا لأنه يظهر داخل الـ APK). يمكن تجاوزه بسر `STARTIO_APP_ID`.
+للتفعيل غيّر في `.github/workflows/android-build.yml` السطر `--dart-define=ADS_ENABLED=false` إلى `true`، وأبقِ `STARTIO_TEST_MODE=true` حتى تتأكد من ظهور إعلانات الاختبار.

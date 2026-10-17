@@ -30,6 +30,19 @@ jobs:
             cp -r /tmp/scaffold/android ./android
           fi
 
+      - name: Prepare release signing (only if secrets are set)
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
+            echo "$KS_B64" | base64 -d > android/app/upload-keystore.jks
+            printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=upload\nstoreFile=upload-keystore.jks\n' "$KS_PASS" "$KS_PASS" > android/key.properties
+            echo "Release keystore prepared."
+          else
+            echo "No signing secrets: APK will be signed with the debug key."
+          fi
+
       - name: Patch AndroidManifest (INTERNET, label, Start.io entries)
         env:
           STARTIO_APP_ID: ${{ secrets.STARTIO_APP_ID }}

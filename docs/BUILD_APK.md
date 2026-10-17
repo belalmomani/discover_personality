@@ -8,3 +8,9 @@
 - `flutter analyze --no-fatal-infos`: التحذيرات تُفشل البناء، والملاحظات (info) لا.
 - APK موقّع بمفتاح debug الافتراضي: يصلح للتجربة فقط. للنشر في Google Play أنشئ keystore وخزّنه في Secrets وابنِ AAB.
 - خطر معروف: إن فشل Gradle بخطأ `Namespace not specified` من `startapp_sdk` (إصدار 1.0.1 صدر مايو 2024)، أضف namespace للمكتبة أو حدّث الحزمة، أو أزل الحزمة مؤقتًا مع `lib/data/ads/startio_backend.dart` ودالة المصنع في `providers.dart`.
+
+## التوقيع (Release signing)
+- الـ workflow يوقّع بمفتاح الإصدار إن وُجد السران `ANDROID_KEYSTORE_BASE64` و`ANDROID_KEYSTORE_PASSWORD` في GitHub Secrets، وإلا يستخدم مفتاح debug.
+- alias المفتاح: `upload`، وكلمة مرور المخزن والمفتاح واحدة.
+- **احتفظ بنسخة احتياطية من ملف .jks وكلمة المرور في مكان آمن، ولا ترفعهما إلى GitHub.** فقدانهما يمنع تحديث التطبيق بنفس التوقيع.
+- الـ package name: `app.discover.discover_personality`.
