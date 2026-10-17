@@ -4,6 +4,7 @@ import 'package:flutter/material.dart' show ThemeMode;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/dev_plan.dart';
+import '../models/extra_result.dart';
 import '../models/saved_result.dart';
 
 class AppSettings {
@@ -57,6 +58,8 @@ class LocalStore {
   static const _kHistory = 'history.v1';
   static const _kPlans = 'plans.v1';
   static const _kSettings = 'settings.v1';
+  static const _kExtra = 'extra.v1';
+  static const _kProfile = 'profile.v1';
 
   Map<String, dynamic>? _readMap(String key) {
     final s = _p.getString(key);
@@ -139,10 +142,41 @@ class LocalStore {
   Future<void> saveSettings(AppSettings s) =>
       _p.setString(_kSettings, jsonEncode(s.toJson()));
 
+  // Additional tests (testId -> latest result). Never synced to the cloud.
+  Map<String, ExtraResult> loadExtra() {
+    final m = _readMap(_kExtra);
+    if (m == null) return {};
+    final out = <String, ExtraResult>{};
+    m.forEach((k, v) {
+      try {
+        out[k] = ExtraResult.fromJson(v as Map<String, dynamic>);
+      } catch (_) {}
+    });
+    return out;
+  }
+
+  Future<void> saveExtra(Map<String, ExtraResult> r) =>
+      _p.setString(_kExtra, jsonEncode(r.map((k, v) => MapEntry(k, v.toJson()))));
+
+  // Personal profile (birth date, country). Local only.
+  UserProfile loadProfile() {
+    final m = _readMap(_kProfile);
+    if (m == null) return const UserProfile();
+    try {
+      return UserProfile.fromJson(m);
+    } catch (_) {
+      return const UserProfile();
+    }
+  }
+
+  Future<void> saveProfile(UserProfile p) => _p.setString(_kProfile, jsonEncode(p.toJson()));
+
   /// Deletes every assessment-related value on this device (settings are kept).
   Future<void> clearUserData() async {
     await _p.remove(_kProgress);
     await _p.remove(_kHistory);
     await _p.remove(_kPlans);
+    await _p.remove(_kExtra);
+    await _p.remove(_kProfile);
   }
 }

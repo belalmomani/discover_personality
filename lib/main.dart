@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app/app.dart';
 import 'app/providers.dart';
 import 'core/config.dart';
+import 'data/models/extra_test.dart';
 import 'data/models/question.dart';
 import 'data/repositories/question_repository.dart';
 import 'data/supabase/cloud_api.dart';
@@ -28,6 +29,14 @@ Future<void> main() async {
     return;
   }
 
+  // Additional tests are optional: if the asset fails to load the profile page just hides them.
+  var extraTests = <ExtraTest>[];
+  try {
+    extraTests = await ExtraTestRepository.loadFromAsset();
+  } catch (e) {
+    debugPrint('Extra tests failed to load: $e');
+  }
+
   // Supabase is optional: any failure leaves the app fully usable offline.
   CloudApi cloud = NoCloudApi();
   if (AppConfig.supabaseConfigured) {
@@ -43,6 +52,7 @@ Future<void> main() async {
     overrides: [
       sharedPrefsProvider.overrideWithValue(prefs),
       questionBankProvider.overrideWithValue(bank),
+      extraTestsProvider.overrideWithValue(extraTests),
       cloudApiProvider.overrideWithValue(cloud),
     ],
     child: const App(),

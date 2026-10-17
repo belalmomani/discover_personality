@@ -11,6 +11,7 @@ import '../assessment/question_screen.dart';
 import '../development_plan/plan_screen.dart';
 import '../help/help_screen.dart';
 import '../history/history_screen.dart';
+import '../profile/profile_screen.dart';
 import '../results/results_screen.dart';
 import '../settings/settings_screen.dart';
 
@@ -115,6 +116,15 @@ class HomeScreen extends ConsumerWidget {
                   icon: Icons.assessment_outlined,
                   child: Text('لا توجد تقارير بعد. ستظهر نتائجك هنا بعد إكمال الاختبار.'),
                 ),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.person_outline),
+                  title: const Text('ملفي الشخصي'),
+                  subtitle: const Text('مسار الحياة، الجيل، الحيوان الأقرب، و18 اختبارًا إضافيًا'),
+                  trailing: const Icon(Icons.chevron_left),
+                  onTap: () => pushScreen(context, const ProfileScreen()),
+                ),
+              ),
               Card(
                 child: ListTile(
                   leading: const Icon(Icons.timeline),

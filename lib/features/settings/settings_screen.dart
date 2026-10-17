@@ -125,7 +125,7 @@ class SettingsScreen extends ConsumerWidget {
             title: 'بياناتك',
             icon: Icons.delete_outline,
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('حذف كل إجابات الاختبار والنتائج والخطط من هذا الجهاز.'),
+              const Text('حذف كل إجابات الاختبار والنتائج والخطط والاختبارات الإضافية وتاريخ الميلاد من هذا الجهاز.'),
               const SizedBox(height: 8),
               OutlinedButton(
                 style: OutlinedButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
@@ -134,6 +134,8 @@ class SettingsScreen extends ConsumerWidget {
                   await ref.read(assessmentProvider.notifier).restart();
                   await ref.read(historyProvider.notifier).clear();
                   await ref.read(plansProvider.notifier).clear();
+                  await ref.read(extraResultsProvider.notifier).clear();
+                  await ref.read(profileProvider.notifier).clear();
                   if (context.mounted) showMessage(context, 'تم حذف بيانات الجهاز.');
                 },
                 child: const Text('حذف بيانات الاختبار من الجهاز'),

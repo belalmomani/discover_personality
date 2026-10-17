@@ -8,6 +8,8 @@ import '../data/ads/ad_service.dart';
 import '../data/ads/startio_backend.dart';
 import '../data/ai/ai_explainer.dart';
 import '../data/models/dev_plan.dart';
+import '../data/models/extra_result.dart';
+import '../data/models/extra_test.dart';
 import '../data/models/question.dart';
 import '../data/models/saved_result.dart';
 import '../data/report/plan_generator.dart';
@@ -219,3 +221,47 @@ class PlansNotifier extends StateNotifier<Map<String, DevPlan>> {
 
 final plansProvider = StateNotifierProvider<PlansNotifier, Map<String, DevPlan>>(
     (ref) => PlansNotifier(ref.watch(localStoreProvider)));
+
+// ---- Additional tests + personal profile
+final extraTestsProvider = Provider<List<ExtraTest>>((ref) => throw UnimplementedError());
+
+class ExtraResultsNotifier extends StateNotifier<Map<String, ExtraResult>> {
+  ExtraResultsNotifier(this._store) : super(_store.loadExtra());
+  final LocalStore _store;
+
+  Future<void> save(String testId, Map<int, int> answers) async {
+    state = {...state, testId: ExtraResult(testId: testId, createdAt: DateTime.now(), answers: Map<int, int>.from(answers))};
+    await _store.saveExtra(state);
+  }
+
+  Future<void> clear() async {
+    state = {};
+    await _store.saveExtra(state);
+  }
+}
+
+final extraResultsProvider = StateNotifierProvider<ExtraResultsNotifier, Map<String, ExtraResult>>(
+    (ref) => ExtraResultsNotifier(ref.watch(localStoreProvider)));
+
+class ProfileNotifier extends StateNotifier<UserProfile> {
+  ProfileNotifier(this._store) : super(_store.loadProfile());
+  final LocalStore _store;
+
+  Future<void> setBirthDate(DateTime d) async {
+    state = state.copyWith(birthDate: DateTime(d.year, d.month, d.day));
+    await _store.saveProfile(state);
+  }
+
+  Future<void> setCountry(String code) async {
+    state = state.copyWith(countryCode: code);
+    await _store.saveProfile(state);
+  }
+
+  Future<void> clear() async {
+    state = const UserProfile();
+    await _store.saveProfile(state);
+  }
+}
+
+final profileProvider =
+    StateNotifierProvider<ProfileNotifier, UserProfile>((ref) => ProfileNotifier(ref.watch(localStoreProvider)));
