@@ -242,11 +242,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView(padding: const EdgeInsets.all(16), children: [
-        Row(children: [
+        Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
           Chip(avatar: const Text('🪙'), label: Text('رصيدك: ${_wallet?.coins ?? 0}')),
-          const SizedBox(width: 8),
           Chip(avatar: const Text('⭐'), label: Text('نقاط المكافآت: ${_wallet?.rewards ?? 0}')),
-          const Spacer(),
           if (canClaim) TextButton(onPressed: _claim, child: const Text('عملات اليوم')),
         ]),
         const SizedBox(height: 8),

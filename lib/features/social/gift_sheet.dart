@@ -112,9 +112,8 @@ class _GiftSheetState extends ConsumerState<_GiftSheet> {
                 : Column(children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(children: [
+                      child: Wrap(spacing: 8, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
                         Chip(avatar: const Text('🪙'), label: Text('رصيدك: ${_wallet!.coins} عملة افتراضية')),
-                        const Spacer(),
                         if (canClaim) TextButton(onPressed: _busy ? null : _claim, child: const Text('عملات اليوم المجانية')),
                       ]),
                     ),
