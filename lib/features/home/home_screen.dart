@@ -14,9 +14,43 @@ import '../history/history_screen.dart';
 import '../profile/profile_screen.dart';
 import '../results/results_screen.dart';
 import '../settings/settings_screen.dart';
+import '../social/chat_list_screen.dart';
+import '../social/community_screen.dart';
 
-class HomeScreen extends ConsumerWidget {
+/// App shell: bottom navigation (Home / People like you / Chats).
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _index = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final pages = <Widget>[
+      const HomeTab(),
+      if (_index == 1) const CommunityScreen() else const SizedBox.shrink(),
+      if (_index == 2) const ChatListScreen() else const SizedBox.shrink(),
+    ];
+    return Scaffold(
+      body: IndexedStack(index: _index, children: pages),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (i) => setState(() => _index = i),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'الرئيسية'),
+          NavigationDestination(icon: Icon(Icons.people_outline), selectedIcon: Icon(Icons.people), label: 'يشبهونك'),
+          NavigationDestination(icon: Icon(Icons.chat_bubble_outline), selectedIcon: Icon(Icons.chat_bubble), label: 'الدردشات'),
+        ],
+      ),
+    );
+  }
+}
+
+class HomeTab extends ConsumerWidget {
+  const HomeTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

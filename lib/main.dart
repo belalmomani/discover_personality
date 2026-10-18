@@ -9,6 +9,7 @@ import 'core/config.dart';
 import 'data/models/extra_test.dart';
 import 'data/models/question.dart';
 import 'data/repositories/question_repository.dart';
+import 'data/social/social_api.dart';
 import 'data/supabase/cloud_api.dart';
 
 Future<void> main() async {
@@ -54,6 +55,7 @@ Future<void> main() async {
       questionBankProvider.overrideWithValue(bank),
       extraTestsProvider.overrideWithValue(extraTests),
       cloudApiProvider.overrideWithValue(cloud),
+      socialApiProvider.overrideWithValue(cloud.isConfigured ? SupabaseSocialApi() : NoSocialApi()),
     ],
     child: const App(),
   ));

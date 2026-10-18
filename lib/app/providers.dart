@@ -16,6 +16,7 @@ import '../data/report/plan_generator.dart';
 import '../data/repositories/local_store.dart';
 import '../data/scoring/scoring_engine.dart';
 import '../data/services/sync_service.dart';
+import '../data/social/social_api.dart';
 import '../data/supabase/cloud_api.dart';
 
 // ---- Overridden in main() / tests
@@ -265,3 +266,6 @@ class ProfileNotifier extends StateNotifier<UserProfile> {
 
 final profileProvider =
     StateNotifierProvider<ProfileNotifier, UserProfile>((ref) => ProfileNotifier(ref.watch(localStoreProvider)));
+
+// ---- Social layer (similar people, chat, gifts). Off unless Supabase is configured.
+final socialApiProvider = Provider<SocialApi>((ref) => NoSocialApi());
