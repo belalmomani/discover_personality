@@ -1,6 +1,6 @@
-/// Generation classification + country context. All content is a broad generalisation:
-/// individuals differ, and event summaries omit detail. Years follow the common
-/// Pew-style boundaries (Gen Y/Millennials 1981-1996, Gen Z 1997-2012, Alpha 2013+).
+// Generation classification + country context. All content is a broad generalisation:
+// individuals differ, and event summaries omit detail. Years follow the common
+// Pew-style boundaries (Gen Y/Millennials 1981-1996, Gen Z 1997-2012, Alpha 2013+).
 
 class Generation {
   const Generation({
