@@ -136,6 +136,7 @@ class SettingsScreen extends ConsumerWidget {
                   await ref.read(plansProvider.notifier).clear();
                   await ref.read(extraResultsProvider.notifier).clear();
                   await ref.read(profileProvider.notifier).clear();
+                  await ref.read(observersProvider.notifier).clear();
                   if (context.mounted) showMessage(context, 'تم حذف بيانات الجهاز.');
                 },
                 child: const Text('حذف بيانات الاختبار من الجهاز'),

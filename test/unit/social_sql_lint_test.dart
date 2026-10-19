@@ -8,7 +8,7 @@ void main() {
 
   test('every new table has RLS enabled', () {
     final tables = RegExp(r'create table if not exists public\.(\w+)').allMatches(sql).map((m) => m.group(1)!).toList();
-    expect(tables, containsAll(['admin_users', 'app_settings', 'shared_features', 'blocks', 'reports', 'conversations', 'messages', 'wallets', 'coin_ledger', 'gifts', 'gift_sends']));
+    expect(tables, containsAll(['admin_users', 'app_settings', 'shared_features', 'blocks', 'abuse_reports', 'conversations', 'messages', 'wallets', 'coin_ledger', 'gifts', 'gift_sends']));
     for (final t in tables) {
       expect(sql.contains('alter table public.$t enable row level security'), isTrue, reason: 'RLS missing on $t');
     }

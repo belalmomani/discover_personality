@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../integrated/observer.dart';
 import '../models/dev_plan.dart';
 import '../models/extra_result.dart';
 import '../models/saved_result.dart';
@@ -60,6 +61,7 @@ class LocalStore {
   static const _kSettings = 'settings.v1';
   static const _kExtra = 'extra.v1';
   static const _kProfile = 'profile.v1';
+  static const _kObservers = 'observers.v1';
 
   Map<String, dynamic>? _readMap(String key) {
     final s = _p.getString(key);
@@ -171,6 +173,23 @@ class LocalStore {
 
   Future<void> saveProfile(UserProfile p) => _p.setString(_kProfile, jsonEncode(p.toJson()));
 
+  // Ratings by other people (device-only)
+  List<ObserverRating> loadObservers() {
+    final l = _readList(_kObservers);
+    if (l == null) return [];
+    final out = <ObserverRating>[];
+    for (final e in l) {
+      try {
+        final r = ObserverRating.fromJson(e as Map<String, dynamic>);
+        if (ObserverRating.isComplete(r.answers)) out.add(r);
+      } catch (_) {}
+    }
+    return out;
+  }
+
+  Future<void> saveObservers(List<ObserverRating> r) =>
+      _p.setString(_kObservers, jsonEncode(r.map((e) => e.toJson()).toList()));
+
   /// Deletes every assessment-related value on this device (settings are kept).
   Future<void> clearUserData() async {
     await _p.remove(_kProgress);
@@ -178,5 +197,6 @@ class LocalStore {
     await _p.remove(_kPlans);
     await _p.remove(_kExtra);
     await _p.remove(_kProfile);
+    await _p.remove(_kObservers);
   }
 }

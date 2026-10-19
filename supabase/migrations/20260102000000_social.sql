@@ -64,7 +64,8 @@ drop policy if exists shared_features_own on public.shared_features;
 create policy shared_features_own on public.shared_features for select to authenticated using ((select auth.uid()) = user_id);
 revoke insert, update, delete on public.shared_features from authenticated, anon;
 
--- ---------- blocks / reports
+-- ---------- blocks / abuse reports
+-- NOTE: `public.reports` already exists (analysis reports from init.sql); moderation reports live in `abuse_reports`.
 create table if not exists public.blocks (
   blocker_id uuid not null references auth.users(id) on delete cascade,
   blocked_id uuid not null references auth.users(id) on delete cascade,
@@ -77,7 +78,7 @@ drop policy if exists blocks_own on public.blocks;
 create policy blocks_own on public.blocks for select to authenticated using ((select auth.uid()) = blocker_id);
 revoke insert, update, delete on public.blocks from authenticated, anon;
 
-create table if not exists public.reports (
+create table if not exists public.abuse_reports (
   id uuid primary key default gen_random_uuid(),
   reporter_id uuid not null references auth.users(id) on delete cascade,
   reported_user_id uuid not null references auth.users(id) on delete cascade,
@@ -88,11 +89,11 @@ create table if not exists public.reports (
   reviewed_at timestamptz,
   created_at timestamptz not null default now()
 );
-alter table public.reports enable row level security;
-drop policy if exists reports_own on public.reports;
-create policy reports_own on public.reports for select to authenticated using ((select auth.uid()) = reporter_id);
-revoke insert, update, delete on public.reports from authenticated, anon;
-create index if not exists idx_reports_status on public.reports(status, created_at desc);
+alter table public.abuse_reports enable row level security;
+drop policy if exists abuse_reports_own on public.abuse_reports;
+create policy abuse_reports_own on public.abuse_reports for select to authenticated using ((select auth.uid()) = reporter_id);
+revoke insert, update, delete on public.abuse_reports from authenticated, anon;
+create index if not exists idx_abuse_reports_status on public.abuse_reports(status, created_at desc);
 
 create or replace function public.is_blocked(a uuid, b uuid)
 returns boolean language sql stable security definer set search_path = public as $$
@@ -427,10 +428,10 @@ begin
   if auth.uid() is null then raise exception 'not_authenticated'; end if;
   if target is null or target = auth.uid() then raise exception 'invalid_user'; end if;
   if char_length(btrim(coalesce(p_reason, ''))) not between 1 and 500 then raise exception 'invalid_reason'; end if;
-  if (select count(*) from public.reports where reporter_id = auth.uid() and created_at > now() - interval '1 day') >= 20 then
+  if (select count(*) from public.abuse_reports where reporter_id = auth.uid() and created_at > now() - interval '1 day') >= 20 then
     raise exception 'rate_limited';
   end if;
-  insert into public.reports (reporter_id, reported_user_id, message_id, reason) values (auth.uid(), target, msg, btrim(p_reason));
+  insert into public.abuse_reports (reporter_id, reported_user_id, message_id, reason) values (auth.uid(), target, msg, btrim(p_reason));
 end;
 $$;
 
@@ -532,7 +533,7 @@ begin
   return query
     select r.id, coalesce(rp.username, 'مستخدم'), r.reported_user_id, coalesce(ru.username, 'مستخدم'),
            m.body, r.reason, r.status, r.created_at
-    from public.reports r
+    from public.abuse_reports r
     left join public.profiles rp on rp.id = r.reporter_id
     left join public.profiles ru on ru.id = r.reported_user_id
     left join public.messages m on m.id = r.message_id
@@ -546,7 +547,7 @@ returns void language plpgsql security definer set search_path = public as $$
 begin
   if not public.is_admin() then raise exception 'forbidden'; end if;
   if p_status not in ('reviewed','dismissed','actioned') then raise exception 'invalid_status'; end if;
-  update public.reports set status = p_status, reviewed_by = auth.uid(), reviewed_at = now() where id = p_id;
+  update public.abuse_reports set status = p_status, reviewed_by = auth.uid(), reviewed_at = now() where id = p_id;
 end;
 $$;
 
@@ -595,7 +596,7 @@ begin
     'gift_sends', (select count(*) from public.gift_sends),
     'coins_spent', (select coalesce(sum(-delta), 0) from public.coin_ledger where balance_type = 'coins' and delta < 0),
     'coins_issued', (select coalesce(sum(delta), 0) from public.coin_ledger where balance_type = 'coins' and delta > 0),
-    'open_reports', (select count(*) from public.reports where status = 'open'));
+    'open_reports', (select count(*) from public.abuse_reports where status = 'open'));
 end;
 $$;
 

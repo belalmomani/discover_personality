@@ -10,6 +10,7 @@ import '../../data/report/report_builder.dart';
 import '../../data/report/report_content.dart';
 import '../assessment/intro_screen.dart';
 import '../development_plan/plan_screen.dart';
+import '../integrated/integrated_report_screen.dart';
 import 'arfd_detail_screen.dart';
 import 'enneagram_detail_screen.dart';
 import 'mbti_detail_screen.dart';
@@ -53,46 +54,68 @@ class ResultsScreen extends ConsumerWidget {
                 SectionCard(title: 'ملخص الشخصية المرشحة', icon: Icons.auto_awesome_outlined, child: Text(report.summary)),
                 const DisclaimerBanner(),
                 SectionCard(
-                  title: 'MBTI: ${r.mbtiType}',
-                  icon: Icons.groups_2_outlined,
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    for (final p in r.mbti)
-                      ScoreBar(
-                        label: '${p.poleA} / ${p.poleB}',
-                        fraction: p.pctA / (p.pctA + p.pctB == 0 ? 1 : p.pctA + p.pctB),
-                        valueText: p.isClose ? 'متقارب' : p.preferred,
-                        highlight: !p.isClose,
-                      ),
-                    if (r.mbtiAnyClose) const Padding(padding: EdgeInsets.only(top: 6), child: Text('بعض الأبعاد متقاربة؛ النتيجة غير حاسمة فيها.')),
-                    Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: TextButton(onPressed: () => pushScreen(context, MbtiDetailScreen(result: r)), child: const Text('التفاصيل')),
-                    ),
-                  ]),
-                ),
-                SectionCard(
-                  title: r.enneagramConclusive ? 'Enneagram: النمط ${r.enneagramTop.type}' : 'Enneagram: أنماط متقاربة',
+                  title: 'التحليل المتكامل',
                   icon: Icons.hub_outlined,
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(report.enneagramLines.first),
-                    Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: TextButton(onPressed: () => pushScreen(context, EnneagramDetailScreen(result: r)), child: const Text('التفاصيل')),
+                    const Text('بدل قراءة ثلاثة رموز منفصلة: كيف تتكامل نتائجك، نقاط القوة ومصادر التعثر، القرار والضغط، وصورتك لدى الآخرين، ودرجة الثقة في كل نتيجة.'),
+                    const SizedBox(height: 8),
+                    FilledButton.icon(
+                      onPressed: () => pushScreen(context, IntegratedReportScreen(resultId: resultId)),
+                      icon: const Icon(Icons.auto_graph),
+                      label: const Text('افتح التحليل المتكامل'),
                     ),
                   ]),
                 ),
-                SectionCard(
-                  title: 'الرمز السلوكي ${r.arfdCode}',
-                  icon: Icons.tune,
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    for (final a in r.arfd)
-                      ScoreBar(label: arfdAxes[a.axis]!.name, fraction: (a.avg - 1) / 4, valueText: a.avg.toStringAsFixed(2)),
-                    const Text('نظام أصلي خاص بالتطبيق وليس مقياسًا نفسيًا معتمدًا.'),
-                    Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: TextButton(onPressed: () => pushScreen(context, ArfdDetailScreen(result: r)), child: const Text('التفاصيل')),
+                Card(
+                  child: ExpansionTile(
+                    shape: const Border(),
+                    title: const Text('الرموز والدرجات التفصيلية (MBTI • Enneagram • A-R-F-D)'),
+                    childrenPadding: const EdgeInsets.all(8),
+                    children: [
+                    SectionCard(
+                      title: 'MBTI: ${r.mbtiType}',
+                      icon: Icons.groups_2_outlined,
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        for (final p in r.mbti)
+                          ScoreBar(
+                            label: '${p.poleA} / ${p.poleB}',
+                            fraction: p.pctA / (p.pctA + p.pctB == 0 ? 1 : p.pctA + p.pctB),
+                            valueText: p.isClose ? 'متقارب' : p.preferred,
+                            highlight: !p.isClose,
+                          ),
+                        if (r.mbtiAnyClose) const Padding(padding: EdgeInsets.only(top: 6), child: Text('بعض الأبعاد متقاربة؛ النتيجة غير حاسمة فيها.')),
+                        Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: TextButton(onPressed: () => pushScreen(context, MbtiDetailScreen(result: r)), child: const Text('التفاصيل')),
+                        ),
+                      ]),
                     ),
-                  ]),
+                    SectionCard(
+                      title: r.enneagramConclusive ? 'Enneagram: النمط ${r.enneagramTop.type}' : 'Enneagram: أنماط متقاربة',
+                      icon: Icons.hub_outlined,
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(report.enneagramLines.first),
+                        Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: TextButton(onPressed: () => pushScreen(context, EnneagramDetailScreen(result: r)), child: const Text('التفاصيل')),
+                        ),
+                      ]),
+                    ),
+                    SectionCard(
+                      title: 'الرمز السلوكي ${r.arfdCode}',
+                      icon: Icons.tune,
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        for (final a in r.arfd)
+                          ScoreBar(label: arfdAxes[a.axis]!.name, fraction: (a.avg - 1) / 4, valueText: a.avg.toStringAsFixed(2)),
+                        const Text('نظام أصلي خاص بالتطبيق وليس مقياسًا نفسيًا معتمدًا.'),
+                        Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: TextButton(onPressed: () => pushScreen(context, ArfdDetailScreen(result: r)), child: const Text('التفاصيل')),
+                        ),
+                      ]),
+                    ),
+                    ],
+                  ),
                 ),
                 if (report.strengths.isNotEmpty) SectionCard(title: 'نقاط قوة محتملة', icon: Icons.thumb_up_alt_outlined, child: BulletList(report.strengths)),
                 if (report.challenges.isNotEmpty) SectionCard(title: 'تحديات قد تعيق التقدم', icon: Icons.flag_outlined, child: BulletList(report.challenges)),

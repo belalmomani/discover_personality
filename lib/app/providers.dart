@@ -9,6 +9,7 @@ import '../data/ads/startio_backend.dart';
 import '../data/ai/ai_explainer.dart';
 import '../data/models/dev_plan.dart';
 import '../data/models/extra_result.dart';
+import '../data/integrated/observer.dart';
 import '../data/models/extra_test.dart';
 import '../data/models/question.dart';
 import '../data/models/saved_result.dart';
@@ -224,7 +225,7 @@ final plansProvider = StateNotifierProvider<PlansNotifier, Map<String, DevPlan>>
     (ref) => PlansNotifier(ref.watch(localStoreProvider)));
 
 // ---- Additional tests + personal profile
-final extraTestsProvider = Provider<List<ExtraTest>>((ref) => throw UnimplementedError());
+final extraTestsProvider = Provider<List<ExtraTest>>((ref) => const <ExtraTest>[]);
 
 class ExtraResultsNotifier extends StateNotifier<Map<String, ExtraResult>> {
   ExtraResultsNotifier(this._store) : super(_store.loadExtra());
@@ -269,3 +270,23 @@ final profileProvider =
 
 // ---- Social layer (similar people, chat, gifts). Off unless Supabase is configured.
 final socialApiProvider = Provider<SocialApi>((ref) => NoSocialApi());
+
+// ---- Ratings from other people about the user (device-only)
+class ObserversNotifier extends StateNotifier<List<ObserverRating>> {
+  ObserversNotifier(this._store) : super(_store.loadObservers());
+  final LocalStore _store;
+
+  Future<void> add(String relation, Map<int, int> answers) async {
+    if (!ObserverRating.isComplete(answers)) throw ArgumentError('incomplete rating');
+    state = [...state, ObserverRating(id: newUuid(), createdAt: DateTime.now(), relation: relation, answers: Map<int, int>.from(answers))];
+    await _store.saveObservers(state);
+  }
+
+  Future<void> clear() async {
+    state = [];
+    await _store.saveObservers(state);
+  }
+}
+
+final observersProvider =
+    StateNotifierProvider<ObserversNotifier, List<ObserverRating>>((ref) => ObserversNotifier(ref.watch(localStoreProvider)));
