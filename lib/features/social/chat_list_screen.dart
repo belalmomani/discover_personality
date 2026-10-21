@@ -94,7 +94,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (_, i) {
                     final c = shown[i];
-                    final preview = c.lastKind == 'gift' ? '🎁 هدية' : (c.lastBody ?? '');
+                    final preview = c.lastKind == 'gift' ? '🎁 هدية' : (c.lastKind == 'image' ? '📷 صورة' : (c.lastBody ?? ''));
                     return ListTile(
                       leading: CircleAvatar(child: Text(c.otherEmoji, style: const TextStyle(fontSize: 22))),
                       title: Text(c.otherUsername),

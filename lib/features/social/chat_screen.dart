@@ -1,8 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
+import '../../data/social/image_validator.dart';
+import '../../data/social/social_api.dart';
 import '../../data/social/social_models.dart';
 import 'gift_sheet.dart';
 
@@ -62,6 +67,46 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     try {
       await ref.read(socialApiProvider).sendMessage(widget.conversationId, t);
       _text.clear();
+    } catch (e) {
+      if (mounted) showMessage(context, socialErrorMessage(e));
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Future<void> _pickImage() async {
+    if (_sending) return;
+    Uint8List bytes;
+    try {
+      // Gallery only (system photo picker: no storage permission needed). Resized and compressed before upload.
+      final x = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 1280, maxHeight: 1280, imageQuality: 80);
+      if (x == null) return;
+      bytes = await x.readAsBytes();
+    } catch (_) {
+      if (mounted) showMessage(context, 'تعذر فتح المعرض.');
+      return;
+    }
+    final check = validateChatImage(bytes);
+    if (!check.ok) {
+      if (mounted) showMessage(context, socialErrorMessage(StateError('invalid_image')));
+      return;
+    }
+    if (!mounted) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (d) => AlertDialog(
+        title: Text('إرسال هذه الصورة إلى ${widget.otherName}؟'),
+        content: ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.memory(bytes, height: 220, fit: BoxFit.cover)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(d, false), child: const Text('إلغاء')),
+          FilledButton(onPressed: () => Navigator.pop(d, true), child: const Text('إرسال')),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _sending = true);
+    try {
+      await ref.read(socialApiProvider).sendImage(widget.conversationId, bytes);
     } catch (e) {
       if (mounted) showMessage(context, socialErrorMessage(e));
     } finally {
@@ -162,7 +207,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     final m = msgs[i];
                     final mine = m.senderId == me;
                     final gift = m.isGift ? _gifts.where((g) => g.id == m.giftId).cast<GiftItem?>().firstWhere((_) => true, orElse: () => null) : null;
-                    final content = m.isGift ? '${gift?.emoji ?? "🎁"} ${mine ? "أرسلت" : "أرسل لك"} هدية${gift == null ? "" : ": ${gift.name}"}' : m.body;
+                    final content = m.isImage ? '' : m.isGift ? '${gift?.emoji ?? "🎁"} ${mine ? "أرسلت" : "أرسل لك"} هدية${gift == null ? "" : ": ${gift.name}"}' : m.body;
                     return Align(
                       alignment: mine ? AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd,
                       child: GestureDetector(
@@ -176,7 +221,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            Text(content, style: m.isGift ? const TextStyle(fontSize: 18) : null),
+                            if (m.isImage) _ImageBubble(path: m.body, api: api) else Text(content, style: m.isGift ? const TextStyle(fontSize: 18) : null),
                             const SizedBox(height: 2),
                             Row(mainAxisSize: MainAxisSize.min, children: [
                               Text(_hhmm(m.createdAt), style: const TextStyle(fontSize: 10)),
@@ -199,6 +244,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 icon: const Icon(Icons.card_giftcard),
                 onPressed: () => showGiftSheet(context, conversationId: widget.conversationId, otherName: widget.otherName),
               ),
+              IconButton(
+                tooltip: 'إرسال صورة',
+                icon: const Icon(Icons.image_outlined),
+                onPressed: _sending ? null : _pickImage,
+              ),
               Expanded(
                 child: TextField(
                   controller: _text,
@@ -215,6 +265,56 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
         ]),
       ),
+    );
+  }
+}
+
+
+/// Loads a short-lived signed URL, then shows the image (tap to enlarge). Failures show a placeholder.
+class _ImageBubble extends StatefulWidget {
+  const _ImageBubble({required this.path, required this.api});
+  final String path;
+  final SocialApi api;
+  @override
+  State<_ImageBubble> createState() => _ImageBubbleState();
+}
+
+class _ImageBubbleState extends State<_ImageBubble> {
+  late final Future<String> _url = widget.api.imageUrl(widget.path);
+
+  Widget _placeholder(IconData icon, String text) => SizedBox(
+        width: 200,
+        height: 120,
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(icon), const SizedBox(height: 4), Text(text, style: const TextStyle(fontSize: 12))]),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: _url,
+      builder: (context, snap) {
+        if (snap.hasError) return _placeholder(Icons.broken_image_outlined, 'تعذر تحميل الصورة');
+        if (!snap.hasData) return _placeholder(Icons.image_outlined, 'جارٍ التحميل...');
+        final url = snap.data!;
+        return GestureDetector(
+          onTap: () => showDialog<void>(
+            context: context,
+            builder: (d) => Dialog(
+              child: InteractiveViewer(child: Image.network(url, errorBuilder: (_, __, ___) => _placeholder(Icons.broken_image_outlined, 'تعذر تحميل الصورة'))),
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.network(
+              url,
+              width: 220,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _placeholder(Icons.broken_image_outlined, 'تعذر تحميل الصورة'),
+              loadingBuilder: (c, child, p) => p == null ? child : _placeholder(Icons.image_outlined, 'جارٍ التحميل...'),
+            ),
+          ),
+        );
+      },
     );
   }
 }

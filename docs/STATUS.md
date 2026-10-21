@@ -44,3 +44,7 @@ SUPABASE_URL وSUPABASE_ANON_KEY (اختياري)، STARTIO_APP_ID (عند ال�
 
 ## ملحق: حفظ تقدم الاختبارات الإضافية
 - يُحفظ كل جواب فور اختياره (`extra_progress.v1`) فلا يضيع إن أُغلقت الشاشة أو التطبيق. اختبارات جديدة في unit/extra_store_test وwidget/profile_screen_test.
+
+## ملحق: صور الدردشة
+- نُفّذت: اختيار من المعرض، فحص التوقيع، ضغط، معاينة تأكيد، رفع لحاوية Storage خاصة، دالة خادم تتحقق قبل إنشاء الرسالة، روابط موقّعة، حدود 2MB و20/ساعة، إبلاغ. ملف SQL: `20260104000000_chat_images.sql`.
+- **لم تُجرَّب** على Supabase ولا على جهاز. أضيفت حزمة `image_picker` (قد تحتاج إصلاح بناء). اختبارات جديدة: unit/chat_images_test وإضافات في widget/social_screens_test.

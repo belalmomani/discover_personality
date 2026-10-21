@@ -39,6 +39,8 @@ class FakeSocial extends NoSocialApi {
   List<SimilarUser> similar;
   Object? giftError;
   List<TestVector> published = const [];
+  final requestedImages = <String>[];
+  String lastKind = 'text';
   final sentGifts = <String>[];
   final sentKeys = <String>[];
   final sentMessages = <String>[];
@@ -69,7 +71,7 @@ class FakeSocial extends NoSocialApi {
   Future<WalletInfo> wallet() async => const WalletInfo(coins: 120, rewards: 7, lastDailyClaim: null);
   @override
   Future<List<ConversationSummary>> conversations() async => [
-        ConversationSummary(id: 'c1', otherId: 'u2', otherUsername: 'سارة', otherEmoji: '🐬', lastSeen: null, lastBody: 'مرحبا', lastKind: 'text', lastAt: DateTime.utc(2026), unread: 3),
+        ConversationSummary(id: 'c1', otherId: 'u2', otherUsername: 'سارة', otherEmoji: '🐬', lastSeen: null, lastBody: 'مرحبا', lastKind: lastKind, lastAt: DateTime.utc(2026), unread: 3),
       ];
   @override
   Future<List<GiftItem>> gifts() async => const [
@@ -87,6 +89,12 @@ class FakeSocial extends NoSocialApi {
   Stream<List<ChatMessage>> messages(String conversationId) => controller.stream;
   @override
   Future<void> sendMessage(String conversationId, String text) async => sentMessages.add(text);
+  @override
+  Future<String> imageUrl(String path) async {
+    requestedImages.add(path);
+    return 'http://localhost/img.png';
+  }
+
   @override
   Future<void> markRead(String conversationId) async => markReads++;
 }
@@ -246,5 +254,29 @@ void main() {
     await tester.tap(find.widgetWithText(SwitchListTile, 'إظهاري للآخرين'));
     await tester.pumpAndSettle();
     expect(api.savedProfiles.last, (visible: false, allowChat: false));
+  });
+
+  testWidgets('chat: image messages request a signed URL, fall back to a placeholder, and an attach button exists', (tester) async {
+    final api = FakeSocial();
+    await tester.pumpWidget(await scope(
+      const MaterialApp(home: ChatScreen(conversationId: 'c1', otherId: 'u2', otherName: 'سارة', otherEmoji: '🐬')),
+      social: api,
+    ));
+    await tester.pump();
+    api.controller.add([
+      ChatMessage(id: 'i1', conversationId: 'c1', senderId: 'u2', kind: 'image', body: 'u2/c1/f.jpg', giftId: null, createdAt: DateTime.utc(2026, 1, 1, 10), readAt: null),
+    ]);
+    await tester.pumpAndSettle();
+    expect(api.requestedImages, ['u2/c1/f.jpg']);
+    expect(find.text('تعذر تحميل الصورة'), findsOneWidget); // test environment has no network
+    expect(find.byTooltip('إرسال صورة'), findsOneWidget);
+  });
+
+  testWidgets('chat list previews an image as a camera label, never as a file path', (tester) async {
+    final api = FakeSocial()..lastKind = 'image';
+    await tester.pumpWidget(await scope(const MaterialApp(home: ChatListScreen()), social: api));
+    await tester.pumpAndSettle();
+    expect(find.text('📷 صورة'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
   });
 }

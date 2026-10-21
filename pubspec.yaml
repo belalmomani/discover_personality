@@ -17,6 +17,7 @@ dependencies:
   supabase_flutter: ^2.5.0
   startapp_sdk: ^1.0.1
   http: ^1.2.0
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:

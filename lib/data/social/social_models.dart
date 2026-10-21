@@ -130,6 +130,7 @@ class ChatMessage {
   final DateTime? readAt;
 
   bool get isGift => kind == 'gift';
+  bool get isImage => kind == 'image';
   bool get isRead => readAt != null;
 
   factory ChatMessage.fromJson(Map<String, dynamic> j) => ChatMessage(
@@ -279,6 +280,8 @@ String socialErrorMessage(Object e) {
     'invalid_message': 'الرسالة فارغة أو أطول من 1000 حرف.',
     'forbidden': 'غير مسموح لك بهذا الإجراء.',
     'chat_disabled': 'الدردشة مغلقة عند أحد الطرفين.',
+    'invalid_image': 'الصورة غير مدعومة أو أكبر من 2 ميجابايت (JPEG أو PNG أو WebP فقط).',
+    'image_limit': 'وصلت إلى الحد الأقصى للصور في الساعة. حاول لاحقًا.',
     'not_authenticated': 'سجّل الدخول أولًا.',
   };
   for (final entry in map.entries) {

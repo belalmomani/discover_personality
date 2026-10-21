@@ -1,4 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../core/utils.dart';
+import 'image_validator.dart';
 
 import 'share_vectors.dart';
 import 'social_models.dart';
@@ -28,6 +33,12 @@ abstract class SocialApi {
   Future<List<ConversationSummary>> conversations();
   Stream<List<ChatMessage>> messages(String conversationId);
   Future<void> sendMessage(String conversationId, String text);
+
+  /// Validates (real signature, <= 2 MB), uploads to the private bucket and creates the message.
+  Future<void> sendImage(String conversationId, Uint8List bytes);
+
+  /// Short-lived signed URL for an image message path.
+  Future<String> imageUrl(String path);
   Future<void> markRead(String conversationId);
   Future<void> touchPresence();
   Future<void> block(String userId);
@@ -74,6 +85,10 @@ class NoSocialApi implements SocialApi {
   Stream<List<ChatMessage>> messages(String conversationId) => Stream.error(StateError('social_unavailable'));
   @override
   Future<void> sendMessage(String conversationId, String text) async => _off();
+  @override
+  Future<void> sendImage(String conversationId, Uint8List bytes) async => _off();
+  @override
+  Future<String> imageUrl(String path) async => _off();
   @override
   Future<void> markRead(String conversationId) async {}
   @override
@@ -173,6 +188,36 @@ class SupabaseSocialApi implements SocialApi {
   @override
   Future<void> sendMessage(String conversationId, String text) async {
     await _c.rpc('send_message', params: {'conv': conversationId, 'text_body': text});
+  }
+
+  @override
+  Future<void> sendImage(String conversationId, Uint8List bytes) async {
+    final uid = userId;
+    if (uid == null) throw StateError('not_authenticated');
+    final check = validateChatImage(bytes);
+    if (!check.ok) throw StateError('invalid_image');
+    final path = chatImagePath(uid, conversationId, newUuid(), check.type!);
+    final bucket = _c.storage.from('chat-images');
+    await bucket.uploadBinary(path, bytes, fileOptions: FileOptions(contentType: check.mime, upsert: false));
+    try {
+      await _c.rpc('send_image_message', params: {'conv': conversationId, 'p_path': path});
+    } catch (e) {
+      try {
+        await bucket.remove([path]); // do not leave an orphan file behind
+      } catch (_) {}
+      rethrow;
+    }
+  }
+
+  final Map<String, ({String url, DateTime at})> _urlCache = {};
+
+  @override
+  Future<String> imageUrl(String path) async {
+    final cached = _urlCache[path];
+    if (cached != null && DateTime.now().difference(cached.at) < const Duration(minutes: 40)) return cached.url;
+    final url = await _c.storage.from('chat-images').createSignedUrl(path, 3600);
+    _urlCache[path] = (url: url, at: DateTime.now());
+    return url;
   }
 
   @override
