@@ -1,4 +1,4 @@
-/// Models for the social layer (similar people, chat, gifts). Pure Dart, no Flutter imports.
+// Models for the social layer (similar people, chat, gifts). Pure Dart, no Flutter imports.
 
 class SocialProfile {
   const SocialProfile({
@@ -287,7 +287,7 @@ String socialErrorMessage(Object e) {
   // Unknown error: show only a short technical hint (code + brief message) to help diagnose,
   // never a stack trace, URL or key.
   final code = RegExp(r'code:\s*([A-Za-z0-9_]{2,12})').firstMatch(t)?.group(1);
-  final msg = RegExp(r'message:\s*([^,)]{1,70})').firstMatch(t)?.group(1)?.trim();
+  final msg = RegExp(r'message:\s*(.{1,80}?)(?=,\s*(?:code|details|hint):|\)?\s*$)').firstMatch(t)?.group(1)?.trim();
   final safe = msg != null && !RegExp(r'(sb_|eyJ|https?://)').hasMatch(msg);
   final hint = [if (code != null) code, if (safe) msg].join(' • ');
   return 'تعذر تنفيذ العملية. تحقق من اتصالك وحاول مجددًا.${hint.isEmpty ? "" : "\n(رمز تقني: $hint)"}';

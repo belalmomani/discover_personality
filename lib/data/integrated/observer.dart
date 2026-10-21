@@ -1,5 +1,5 @@
-/// Ratings given by OTHER people about the user (to compare "public image" with self-report).
-/// Stored on the device only. Items mirror the five Big-Five dimensions (2 items each, one reversed).
+// Ratings given by OTHER people about the user (to compare "public image" with self-report).
+// Stored on the device only. Items mirror the five Big-Five dimensions (2 items each, one reversed).
 
 class ObserverItem {
   const ObserverItem(this.id, this.dim, this.text, {this.reverse = false});
