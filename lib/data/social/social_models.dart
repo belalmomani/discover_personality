@@ -8,7 +8,15 @@ class SocialProfile {
     required this.showLastSeen,
     required this.ageConfirmed,
     required this.banned,
+    this.visible = true,
+    this.allowChat = true,
   });
+
+  /// Shown to other people in "people like you" (false = hidden).
+  final bool visible;
+
+  /// Chat switched on (messages and gifts are refused when either side switches it off).
+  final bool allowChat;
   final String? username;
   final String avatarEmoji;
   final bool shareResults;
@@ -26,11 +34,28 @@ class SocialProfile {
         showLastSeen: (j['show_last_seen'] as bool?) ?? true,
         ageConfirmed: (j['age_confirmed'] as bool?) ?? false,
         banned: (j['banned'] as bool?) ?? false,
+        visible: (j['visible'] as bool?) ?? true,
+        allowChat: (j['allow_chat'] as bool?) ?? true,
       );
 }
 
 class SimilarUser {
-  const SimilarUser({required this.userId, required this.username, required this.emoji, required this.similarity});
+  const SimilarUser({
+    required this.userId,
+    required this.username,
+    required this.emoji,
+    required this.similarity,
+    this.testsUsed = 0,
+    this.questionsUsed = 0,
+    this.canChat = true,
+  });
+
+  /// How many shared tests (and how many questions in them) the similarity is based on.
+  final int testsUsed;
+  final int questionsUsed;
+
+  /// False when either side switched chat off.
+  final bool canChat;
   final String userId;
   final String username;
   final String emoji;
@@ -41,6 +66,9 @@ class SimilarUser {
         username: (j['username'] as String?) ?? 'مستخدم',
         emoji: (j['avatar_emoji'] as String?) ?? '🙂',
         similarity: (j['similarity'] as num).toInt(),
+        testsUsed: ((j['tests_used'] as num?) ?? 0).toInt(),
+        questionsUsed: ((j['questions_used'] as num?) ?? 0).toInt(),
+        canChat: (j['can_chat'] as bool?) ?? true,
       );
 }
 
@@ -250,10 +278,17 @@ String socialErrorMessage(Object e) {
     'age_required': 'يجب تأكيد أن عمرك 18 سنة أو أكثر.',
     'invalid_message': 'الرسالة فارغة أو أطول من 1000 حرف.',
     'forbidden': 'غير مسموح لك بهذا الإجراء.',
+    'chat_disabled': 'الدردشة مغلقة عند أحد الطرفين.',
     'not_authenticated': 'سجّل الدخول أولًا.',
   };
   for (final entry in map.entries) {
     if (t.contains(entry.key)) return entry.value;
   }
-  return 'تعذر تنفيذ العملية. تحقق من اتصالك وحاول مجددًا.';
+  // Unknown error: show only a short technical hint (code + brief message) to help diagnose,
+  // never a stack trace, URL or key.
+  final code = RegExp(r'code:\s*([A-Za-z0-9_]{2,12})').firstMatch(t)?.group(1);
+  final msg = RegExp(r'message:\s*([^,)]{1,70})').firstMatch(t)?.group(1)?.trim();
+  final safe = msg != null && !RegExp(r'(sb_|eyJ|https?://)').hasMatch(msg);
+  final hint = [if (code != null) code, if (safe) msg].join(' • ');
+  return 'تعذر تنفيذ العملية. تحقق من اتصالك وحاول مجددًا.${hint.isEmpty ? "" : "\n(رمز تقني: $hint)"}';
 }

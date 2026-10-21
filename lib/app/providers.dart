@@ -290,3 +290,32 @@ class ObserversNotifier extends StateNotifier<List<ObserverRating>> {
 
 final observersProvider =
     StateNotifierProvider<ObserversNotifier, List<ObserverRating>>((ref) => ObserversNotifier(ref.watch(localStoreProvider)));
+
+// ---- Progress of unfinished additional tests (survives closing the screen / the app)
+class ExtraProgressNotifier extends StateNotifier<Map<String, Map<int, int>>> {
+  ExtraProgressNotifier(this._store) : super(_store.loadExtraProgress());
+  final LocalStore _store;
+
+  Future<void> setAnswer(String testId, int itemId, int value) async {
+    if (value < 1 || value > 5) throw ArgumentError('value must be 1..5');
+    state = {
+      ...state,
+      testId: {...(state[testId] ?? const <int, int>{}), itemId: value},
+    };
+    await _store.saveExtraProgress(state);
+  }
+
+  Future<void> clearTest(String testId) async {
+    if (!state.containsKey(testId)) return;
+    state = Map<String, Map<int, int>>.from(state)..remove(testId);
+    await _store.saveExtraProgress(state);
+  }
+
+  Future<void> clear() async {
+    state = {};
+    await _store.saveExtraProgress(state);
+  }
+}
+
+final extraProgressProvider = StateNotifierProvider<ExtraProgressNotifier, Map<String, Map<int, int>>>(
+    (ref) => ExtraProgressNotifier(ref.watch(localStoreProvider)));

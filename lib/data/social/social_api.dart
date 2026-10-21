@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'share_vectors.dart';
 import 'social_models.dart';
 
 /// Gateway to the social backend. Every rule is enforced by Supabase (RLS + SECURITY DEFINER
@@ -16,8 +17,12 @@ abstract class SocialApi {
     required bool shareResults,
     required bool showLastSeen,
     required bool ageConfirmed,
+    bool visible = true,
+    bool allowChat = true,
   });
-  Future<void> publishFeatures(List<double> features);
+
+  /// Publishes the per-test score vectors used for the weighted similarity.
+  Future<void> publishScores(List<TestVector> vectors);
   Future<List<SimilarUser>> findSimilar();
   Future<String> startConversation(String otherId);
   Future<List<ConversationSummary>> conversations();
@@ -56,9 +61,9 @@ class NoSocialApi implements SocialApi {
   @override
   Future<SocialProfile?> myProfile() async => _off();
   @override
-  Future<void> saveProfile({required String username, required String emoji, required bool shareResults, required bool showLastSeen, required bool ageConfirmed}) async => _off();
+  Future<void> saveProfile({required String username, required String emoji, required bool shareResults, required bool showLastSeen, required bool ageConfirmed, bool visible = true, bool allowChat = true}) async => _off();
   @override
-  Future<void> publishFeatures(List<double> features) async => _off();
+  Future<void> publishScores(List<TestVector> vectors) async => _off();
   @override
   Future<List<SimilarUser>> findSimilar() async => _off();
   @override
@@ -127,19 +132,22 @@ class SupabaseSocialApi implements SocialApi {
   }
 
   @override
-  Future<void> saveProfile({required String username, required String emoji, required bool shareResults, required bool showLastSeen, required bool ageConfirmed}) async {
+  Future<void> saveProfile({required String username, required String emoji, required bool shareResults, required bool showLastSeen, required bool ageConfirmed, bool visible = true, bool allowChat = true}) async {
     await _c.rpc('save_my_profile', params: {
       'p_username': username,
       'p_emoji': emoji,
       'p_share': shareResults,
       'p_show_last_seen': showLastSeen,
       'p_age_confirmed': ageConfirmed,
+      'p_visible': visible,
+      'p_allow_chat': allowChat,
     });
   }
 
   @override
-  Future<void> publishFeatures(List<double> features) async {
-    await _c.rpc('publish_features', params: {'vec': features});
+  Future<void> publishScores(List<TestVector> vectors) async {
+    if (vectors.isEmpty) return;
+    await _c.rpc('publish_scores_batch', params: {'payload': [for (final v in vectors) v.toJson()]});
   }
 
   @override

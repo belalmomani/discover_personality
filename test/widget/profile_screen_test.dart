@@ -53,4 +53,14 @@ void main() {
     final b = tester.widget<FilledButton>(find.byType(FilledButton));
     expect(b.onPressed, isNull);
   });
+
+  testWidgets('additional test restores the answers of an unfinished attempt', (tester) async {
+    final test = loadExtraTests().firstWhere((t) => t.id == 'nfc');
+    await tester.pumpWidget(await scope(
+      MaterialApp(home: ExtraTestScreen(test: test)),
+      prefs: {'extra_progress.v1': '{"nfc":{"1":4,"2":5,"3":2}}'},
+    ));
+    await tester.pumpAndSettle();
+    expect(find.text('أجبت عن 3 من 6'), findsOneWidget);
+  });
 }

@@ -62,6 +62,7 @@ class LocalStore {
   static const _kExtra = 'extra.v1';
   static const _kProfile = 'profile.v1';
   static const _kObservers = 'observers.v1';
+  static const _kExtraProgress = 'extra_progress.v1';
 
   Map<String, dynamic>? _readMap(String key) {
     final s = _p.getString(key);
@@ -173,6 +174,23 @@ class LocalStore {
 
   Future<void> saveProfile(UserProfile p) => _p.setString(_kProfile, jsonEncode(p.toJson()));
 
+  // Unfinished additional tests (testId -> answers so far)
+  Map<String, Map<int, int>> loadExtraProgress() {
+    final m = _readMap(_kExtraProgress);
+    if (m == null) return {};
+    final out = <String, Map<int, int>>{};
+    m.forEach((k, v) {
+      try {
+        final a = (v as Map<String, dynamic>).map((ik, iv) => MapEntry(int.parse(ik), iv as int));
+        if (a.values.every((x) => x >= 1 && x <= 5)) out[k] = a;
+      } catch (_) {}
+    });
+    return out;
+  }
+
+  Future<void> saveExtraProgress(Map<String, Map<int, int>> p) => _p.setString(
+      _kExtraProgress, jsonEncode(p.map((k, v) => MapEntry(k, v.map((ik, iv) => MapEntry('$ik', iv))))));
+
   // Ratings by other people (device-only)
   List<ObserverRating> loadObservers() {
     final l = _readList(_kObservers);
@@ -198,5 +216,6 @@ class LocalStore {
     await _p.remove(_kExtra);
     await _p.remove(_kProfile);
     await _p.remove(_kObservers);
+    await _p.remove(_kExtraProgress);
   }
 }

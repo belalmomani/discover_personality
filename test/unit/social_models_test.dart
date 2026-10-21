@@ -76,5 +76,10 @@ void main() {
     final unknown = socialErrorMessage(Exception('relation "x" does not exist at SELECT secret'));
     expect(unknown.contains('secret'), isFalse);
     expect(unknown, contains('تعذر'));
+    final withCode = socialErrorMessage(Exception('PostgrestException(message: function public.my_profile() does not exist, code: 42883, details: x)'));
+    expect(withCode, contains('42883'));
+    expect(withCode, contains('does not exist'));
+    final withKey = socialErrorMessage(Exception('PostgrestException(message: bad key sb_secret_123, code: 401)'));
+    expect(withKey.contains('sb_secret'), isFalse);
   });
 }

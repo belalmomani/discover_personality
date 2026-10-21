@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:discover_personality/app/providers.dart';
 import 'package:discover_personality/data/models/dev_plan.dart';
 import 'package:discover_personality/data/models/saved_result.dart';
+import 'package:discover_personality/data/social/share_vectors.dart';
 import 'package:discover_personality/data/social/social_api.dart';
 import 'package:discover_personality/data/social/social_models.dart';
 import 'package:discover_personality/data/supabase/cloud_api.dart';
@@ -37,6 +38,7 @@ class FakeSocial extends NoSocialApi {
   SocialProfile? profile;
   List<SimilarUser> similar;
   Object? giftError;
+  List<TestVector> published = const [];
   final sentGifts = <String>[];
   final sentKeys = <String>[];
   final sentMessages = <String>[];
@@ -53,8 +55,16 @@ class FakeSocial extends NoSocialApi {
   Future<bool> isAdmin() async => false;
   @override
   Future<List<SimilarUser>> findSimilar() async => similar;
+  final savedProfiles = <({bool visible, bool allowChat})>[];
   @override
-  Future<void> publishFeatures(List<double> features) async {}
+  Future<void> saveProfile({required String username, required String emoji, required bool shareResults, required bool showLastSeen, required bool ageConfirmed, bool visible = true, bool allowChat = true}) async {
+    savedProfiles.add((visible: visible, allowChat: allowChat));
+  }
+
+  @override
+  Future<void> publishScores(List<TestVector> vectors) async {
+    published = vectors;
+  }
   @override
   Future<WalletInfo> wallet() async => const WalletInfo(coins: 120, rewards: 7, lastDailyClaim: null);
   @override
@@ -198,5 +208,43 @@ void main() {
     await tester.tap(find.text('إرسال'));
     await tester.pumpAndSettle();
     expect(find.textContaining('رصيدك من العملات لا يكفي'), findsOneWidget);
+  });
+
+  testWidgets('similar people: shows how many tests/questions the match is based on and disables chat when closed', (tester) async {
+    tester.view.physicalSize = const Size(800, 4000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final api = FakeSocial(
+      profile: const SocialProfile(username: 'ali', avatarEmoji: '🦅', shareResults: true, showLastSeen: true, ageConfirmed: true, banned: false),
+      similar: const [
+        SimilarUser(userId: 'u2', username: 'سارة', emoji: '🐬', similarity: 82, testsUsed: 7, questionsUsed: 150),
+        SimilarUser(userId: 'u3', username: 'خالد', emoji: '🦉', similarity: 75, testsUsed: 3, questionsUsed: 72, canChat: false),
+      ],
+    );
+    await tester.pumpWidget(await scope(const MaterialApp(home: CommunityScreen()), social: api));
+    await tester.pumpAndSettle();
+    expect(find.text('مبني على 7 اختبارات (150 سؤالًا)'), findsOneWidget);
+    expect(find.text('مبني على 3 اختبارات (72 سؤالًا)'), findsOneWidget);
+    expect(find.text('دردشة'), findsOneWidget);
+    expect(find.text('مغلقة'), findsOneWidget);
+    final closed = tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'مغلقة'));
+    expect(closed.onPressed, isNull);
+  });
+
+  testWidgets('quick switches: hide-me and allow-chat are saved through the server call', (tester) async {
+    tester.view.physicalSize = const Size(800, 4000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final api = FakeSocial(
+      profile: const SocialProfile(username: 'ali', avatarEmoji: '🦅', shareResults: true, showLastSeen: true, ageConfirmed: true, banned: false),
+    );
+    await tester.pumpWidget(await scope(const MaterialApp(home: CommunityScreen()), social: api));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(SwitchListTile, 'السماح بالدردشة'));
+    await tester.pumpAndSettle();
+    expect(api.savedProfiles.last, (visible: true, allowChat: false));
+    await tester.tap(find.widgetWithText(SwitchListTile, 'إظهاري للآخرين'));
+    await tester.pumpAndSettle();
+    expect(api.savedProfiles.last, (visible: false, allowChat: false));
   });
 }

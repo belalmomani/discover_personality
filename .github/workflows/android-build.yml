@@ -55,9 +55,8 @@ jobs:
       - name: Install packages
         run: flutter pub get
 
-      - name: Format check (non-blocking, see docs/BUILD_APK.md)
-        continue-on-error: true
-        run: dart format --output=none --set-exit-if-changed lib test
+      - name: Format code (applies dart format inside the runner only)
+        run: dart format lib test
 
       - name: Analyze
         run: flutter analyze --no-fatal-infos

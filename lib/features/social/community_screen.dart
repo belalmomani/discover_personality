@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
-import '../../data/profile/animals.dart';
+import '../../data/scoring/extra_scoring.dart';
+import '../../data/social/share_vectors.dart';
 import '../../data/social/social_models.dart';
 import '../auth/auth_screen.dart';
 import 'admin_screen.dart';
@@ -32,6 +33,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
   bool _share = false;
   bool _showSeen = true;
   bool _age = false;
+  bool _visible = true;
+  bool _allowChat = true;
   bool _saving = false;
 
   @override
@@ -65,12 +68,21 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
         _share = p.shareResults;
         _showSeen = p.showLastSeen;
         _age = p.ageConfirmed;
+        _visible = p.visible;
+        _allowChat = p.allowChat;
       }
       _admin = await api.isAdmin();
       if (p != null && p.isComplete) {
         final history = ref.read(historyProvider);
         if (history.isNotEmpty) {
-          await api.publishFeatures(featuresOf(history.first.result));
+          // Similarity uses ALL completed tests; each test is weighted by its number of questions (server-side).
+          final tests = ref.read(extraTestsProvider);
+          final results = ref.read(extraResultsProvider);
+          final extraAnswers = <String, Map<int, int>>{
+            for (final t in tests)
+              if (results[t.id] != null && ExtraScoring.isComplete(t, results[t.id]!.answers)) t.id: results[t.id]!.answers,
+          };
+          await api.publishScores(buildShareVectors(main: history.first.result, tests: tests, extraAnswers: extraAnswers));
         }
         _similar = await api.findSimilar();
         _wallet = await api.wallet();
@@ -95,6 +107,8 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
             shareResults: _share,
             showLastSeen: _showSeen,
             ageConfirmed: _age,
+            visible: _visible,
+            allowChat: _allowChat,
           );
       _editing = false;
       await _load();
@@ -110,6 +124,32 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       final id = await ref.read(socialApiProvider).startConversation(u.userId);
       if (!mounted) return;
       pushScreen(context, ChatScreen(conversationId: id, otherId: u.userId, otherName: u.username, otherEmoji: u.emoji));
+    } catch (e) {
+      if (mounted) showMessage(context, socialErrorMessage(e));
+    }
+  }
+
+  Future<void> _quick({bool? visible, bool? allowChat}) async {
+    final p = _profile;
+    if (p == null) return;
+    final newVisible = visible ?? _visible;
+    final newAllow = allowChat ?? _allowChat;
+    try {
+      await ref.read(socialApiProvider).saveProfile(
+            username: p.username ?? _name.text.trim(),
+            emoji: p.avatarEmoji,
+            shareResults: p.shareResults,
+            showLastSeen: p.showLastSeen,
+            ageConfirmed: p.ageConfirmed,
+            visible: newVisible,
+            allowChat: newAllow,
+          );
+      if (mounted) {
+        setState(() {
+          _visible = newVisible;
+          _allowChat = newAllow;
+        });
+      }
     } catch (e) {
       if (mounted) showMessage(context, socialErrorMessage(e));
     }
@@ -228,6 +268,20 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
       CheckboxListTile(contentPadding: EdgeInsets.zero, value: _age, onChanged: (v) => setState(() => _age = v ?? false), title: const Text('أؤكد أن عمري 18 سنة أو أكثر')),
       CheckboxListTile(contentPadding: EdgeInsets.zero, value: _share, onChanged: (v) => setState(() => _share = v ?? false), title: const Text('أوافق على مشاركة ملخص نتائجي للمطابقة مع الآخرين')),
       CheckboxListTile(contentPadding: EdgeInsets.zero, value: _showSeen, onChanged: (v) => setState(() => _showSeen = v ?? true), title: const Text('إظهار «آخر ظهور» للمحادثين')),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: _visible,
+        onChanged: (v) => setState(() => _visible = v),
+        title: const Text('إظهاري للآخرين في «يشبهونك»'),
+        subtitle: const Text('أوقفه لتخفي نفسك عن القوائم دون حذف مشاركتك.'),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: _allowChat,
+        onChanged: (v) => setState(() => _allowChat = v),
+        title: const Text('السماح بالدردشة'),
+        subtitle: const Text('عند إيقافه لا تُرسَل ولا تُستقبل رسائل أو هدايا.'),
+      ),
       const SizedBox(height: 8),
       FilledButton(
         onPressed: _saving ? null : _save,
@@ -247,6 +301,24 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
           Chip(avatar: const Text('⭐'), label: Text('نقاط المكافآت: ${_wallet?.rewards ?? 0}')),
           if (canClaim) TextButton(onPressed: _claim, child: const Text('عملات اليوم')),
         ]),
+        Card(
+          child: Column(children: [
+            SwitchListTile(
+              dense: true,
+              value: _visible,
+              onChanged: (v) => _quick(visible: v),
+              title: const Text('إظهاري للآخرين'),
+              subtitle: const Text('إيقافه يخفيك من قائمة «يشبهونك»'),
+            ),
+            SwitchListTile(
+              dense: true,
+              value: _allowChat,
+              onChanged: (v) => _quick(allowChat: v),
+              title: const Text('السماح بالدردشة'),
+              subtitle: const Text('إيقافه يوقف الرسائل والهدايا'),
+            ),
+          ]),
+        ),
         const SizedBox(height: 8),
         if (ref.watch(historyProvider).isEmpty)
           const SectionCard(title: 'أكمل الاختبار الرئيسي', icon: Icons.fact_check_outlined, child: Text('تحتاج إلى نتيجة محفوظة ليُحسب التشابه.')),
@@ -258,8 +330,11 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
               child: ListTile(
                 leading: CircleAvatar(child: Text(u.emoji, style: const TextStyle(fontSize: 22))),
                 title: Text(u.username),
-                subtitle: Text('تشابه في الصفات: ${u.similarity}٪'),
-                trailing: FilledButton.tonal(onPressed: () => _chat(u), child: const Text('دردشة')),
+                subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('تشابه في الصفات: ${u.similarity}٪'),
+                  if (u.testsUsed > 0) Text('مبني على ${u.testsUsed} اختبارات (${u.questionsUsed} سؤالًا)', style: Theme.of(context).textTheme.bodySmall),
+                ]),
+                trailing: FilledButton.tonal(onPressed: u.canChat ? () => _chat(u) : null, child: Text(u.canChat ? 'دردشة' : 'مغلقة')),
               ),
             ),
         const SizedBox(height: 8),

@@ -15,10 +15,20 @@ class ExtraTestScreen extends ConsumerStatefulWidget {
 }
 
 class _ExtraTestScreenState extends ConsumerState<ExtraTestScreen> {
-  final Map<int, int> _answers = {};
+  late final Map<int, int> _answers;
+
+  @override
+  void initState() {
+    super.initState();
+    // Restore answers from an unfinished attempt (only ids that still exist in this test).
+    final ids = widget.test.items.map((i) => i.id).toSet();
+    final saved = ref.read(extraProgressProvider)[widget.test.id] ?? const <int, int>{};
+    _answers = {for (final e in saved.entries) if (ids.contains(e.key)) e.key: e.value};
+  }
 
   Future<void> _finish() async {
     await ref.read(extraResultsProvider.notifier).save(widget.test.id, _answers);
+    await ref.read(extraProgressProvider.notifier).clearTest(widget.test.id);
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(builder: (_) => ExtraResultScreen(test: widget.test)),
@@ -63,7 +73,10 @@ class _ExtraTestScreenState extends ConsumerState<ExtraTestScreen> {
                                 selected: _answers[t.items[i].id] == o.value,
                                 selectedColor: cs.primaryContainer,
                                 showCheckmark: false,
-                                onSelected: (_) => setState(() => _answers[t.items[i].id] = o.value),
+                                onSelected: (_) {
+                                  setState(() => _answers[t.items[i].id] = o.value);
+                                  ref.read(extraProgressProvider.notifier).setAnswer(t.id, t.items[i].id, o.value);
+                                },
                               ),
                             ),
                           ),
