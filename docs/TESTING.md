@@ -21,6 +21,7 @@
 | widget/integrated_screen_test | أقسام التحليل المتكامل وتقييم الآخرين وصفحة النتائج |
 | unit/similarity_v2_test | تطابق كتالوج الأوزان مع الاختبارات، الصيغة الموزونة، استبعاد الحساس، فحص نصي لـ SQL |
 | unit/chat_images_test | فحص توقيع الصور (JPEG/PNG/WebP فقط، 2MB)، مسار التخزين، فحص نصي لـ SQL |
+| unit/similarity_cache_test | فحص نصي لـ SQL الذاكرة المؤقتة: الخصوصية، التحديث عند التغيّر فقط، الحذف التلقائي |
 | supabase/tests/rls_check.sql | عزل RLS يدويًا في SQL Editor |
 
 **لم يُشغَّل أي اختبار من المؤلف** (لا Flutter في بيئة الكتابة).
