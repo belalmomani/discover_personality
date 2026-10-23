@@ -148,7 +148,11 @@ class IntegratedReport {
     required this.flags,
     required this.confidences,
     required this.extraConfidences,
+    this.careerLines = const [],
+    this.wellbeingLines = const [],
   });
+  final List<String> careerLines;
+  final List<String> wellbeingLines;
   final String headline;
   final List<Construct> constructs;
   final List<String> themes;
@@ -194,6 +198,20 @@ class IntegratedReport {
       b.writeln('## تناقضات محتملة');
       for (final c in contradictions) {
         b.writeln('- $c');
+      }
+    }
+    if (careerLines.isNotEmpty) {
+      b.writeln();
+      b.writeln('## الميول المهنية');
+      for (final l in careerLines) {
+        b.writeln('- $l');
+      }
+    }
+    if (wellbeingLines.isNotEmpty) {
+      b.writeln();
+      b.writeln('## الرفاه والنظرة للنفس');
+      for (final l in wellbeingLines) {
+        b.writeln('- $l');
       }
     }
     b.writeln();
@@ -359,12 +377,14 @@ class IntegratedEngine {
         sv('Big Five (يقظة الضمير)', ex('bigfive', 'C')),
         sv('HEXACO (الضمير)', ex('hexaco', 'C')),
         sv('أسلوب العمل (الحذر والانضباط)', ex('workstyle', 'P')),
+        sv('التسويف (معكوس)', ex('procrast', 'T') == null ? null : 100 - ex('procrast', 'T')!),
       ])),
       Construct('openness', 'الانفتاح على الجديد', src([
         SourceValue('MBTI S/N (الحدس)', pole(r.mbti[1], false)),
         sv('Big Five (الانفتاح)', ex('bigfive', 'O')),
         sv('HEXACO (الانفتاح)', ex('hexaco', 'O')),
         sv('أسلوب العمل (الفضول)', ex('workstyle', 'Q')),
+        sv('الميول المهنية (الفني)', ex('riasec', 'A')),
       ])),
       Construct('logic', 'الميل للمنطق مقابل القيم', src([SourceValue('MBTI T/F', pole(r.mbti[2], true))])),
       Construct('analysis', 'التحليل قبل القرار', src([
@@ -380,11 +400,14 @@ class IntegratedEngine {
       Construct('follow', 'الاستمرارية والتنفيذ', src([
         SourceValue('A-R-F-D (F)', arfd('F')),
         sv('Big Five (يقظة الضمير)', ex('bigfive', 'C')),
+        sv('العزيمة (Grit)', exMean('grit')),
+        sv('التسويف (معكوس)', ex('procrast', 'T') == null ? null : 100 - ex('procrast', 'T')!),
       ])),
       Construct('drive', 'الدافع والاستقلالية', src([
         SourceValue('A-R-F-D (D)', arfd('D')),
         sv('أسلوب العمل (الطموح)', ex('workstyle', 'M')),
         sv('القيم (الإنجاز والمكانة)', ex('values', 'A')),
+        sv('عقلية النمو', ex('growth', 'G')),
       ])),
       Construct('empathy', 'التعاطف والتعاون', src([
         sv('Big Five (الوِد)', ex('bigfive', 'A')),
@@ -392,6 +415,7 @@ class IntegratedEngine {
         sv('الذكاء العاطفي (التعاطف)', ex('eq', 'E')),
         sv('أسلوب العمل (الدفء)', ex('workstyle', 'W')),
         sv('الأسس الأخلاقية (الرعاية)', ex('moral', 'C')),
+        (ex('empathy', 'P') == null || ex('empathy', 'E') == null) ? null : SourceValue('اختبار التعاطف', (ex('empathy', 'P')! + ex('empathy', 'E')!) / 2),
       ])),
       Construct('reactivity', 'الحساسية للضغط', src([
         sv('Big Five (الحساسية الانفعالية)', ex('bigfive', 'N')),
@@ -399,6 +423,11 @@ class IntegratedEngine {
         sv('المرونة النفسية (معكوسة)', ex('resilience', 'R') == null ? null : 100 - ex('resilience', 'R')!),
         sv('رأس المال النفسي (معكوس)', exMean('psycap') == null ? null : 100 - exMean('psycap')!),
         sv('الذكاء العاطفي: تنظيم الانفعال (معكوس)', ex('eq', 'R') == null ? null : 100 - ex('eq', 'R')!),
+        sv('الحساسية العالية للمؤثرات', ex('hsp', 'H')),
+        sv('اختبار التعاطف (الضيق الشخصي)', ex('empathy', 'D')),
+        sv('تقدير الذات (معكوس)', ex('selfesteem', 'S') == null ? null : 100 - ex('selfesteem', 'S')!),
+        sv('الرضا عن الحياة (معكوس)', ex('lifesat', 'L') == null ? null : 100 - ex('lifesat', 'L')!),
+        sv('اختبار التفاؤل (معكوس)', ex('optimism', 'O') == null ? null : 100 - ex('optimism', 'O')!),
       ])),
     ];
   }
@@ -581,6 +610,15 @@ class IntegratedEngine {
     'moral': 'الأسس الأخلاقية',
     'resilience': 'المرونة النفسية',
     'psycap': 'رأس المال النفسي',
+    'riasec': 'الميول المهنية',
+    'grit': 'العزيمة',
+    'procrast': 'التسويف',
+    'growth': 'عقلية النمو',
+    'empathy': 'اختبار التعاطف',
+    'hsp': 'الحساسية العالية',
+    'selfesteem': 'تقدير الذات',
+    'lifesat': 'الرضا عن الحياة',
+    'optimism': 'اختبار التفاؤل',
   };
 
   // ---------- strengths / stumbling rules
@@ -737,7 +775,11 @@ class IntegratedEngine {
     final res = ex('resilience', 'R');
     final loc = ex('locus', 'L');
     final reg = ex('eq', 'R');
+    final reappraisal = ex('emoreg', 'R');
+    final suppression = ex('emoreg', 'S');
     final resources = <String>[];
+    if (reappraisal != null) resources.add('إعادة التقييم ${levelName(levelOf(reappraisal))}');
+    if (suppression != null) resources.add('كبت التعبير ${levelName(levelOf(suppression))}');
     if (res != null) resources.add('المرونة النفسية ${levelName(levelOf(res))}');
     if (reg != null) resources.add('تنظيم الانفعال ${levelName(levelOf(reg))}');
     if (loc != null) resources.add('مركز التحكم الداخلي ${levelName(levelOf(loc))}');
@@ -755,6 +797,44 @@ class IntegratedEngine {
     }
     lines.add('هذه أوصاف ذاتية لا قياسات سلوكية للضغط الفعلي.');
     return (lines, true);
+  }
+
+  // ---------- career interests (RIASEC) and well-being (only when measured)
+  static List<String> careerLines(IntegratedInput i) {
+    final t = i.extraTests.where((x) => x.id == 'riasec');
+    final a = i.extraAnswers['riasec'];
+    if (t.isEmpty || a == null) return const [];
+    final sc = ExtraScoring.compute(t.first, a);
+    final order = [...sc.dims]..sort((x, y) {
+        final c = y.pct.compareTo(x.pct);
+        return c != 0 ? c : sc.dims.indexOf(x).compareTo(sc.dims.indexOf(y));
+      });
+    final top = order.take(3).toList();
+    return [
+      'رمزك المهني (على طريقة هولاند): ${top.map((d) => d.dim.id).join()} — ${top.map((d) => "${d.dim.name} ${d.pct.round()}٪").join("، ")}.',
+      'هذا ميل لما تحب لا حكم على ما تُتقن، وليس إرشادًا مهنيًا؛ استعمله لتوليد أفكار تجرّبها.',
+    ];
+  }
+
+  static List<String> wellbeingLines(IntegratedInput i) {
+    double? pct(String test, String dim) {
+      final t = i.extraTests.where((x) => x.id == test);
+      final a = i.extraAnswers[test];
+      if (t.isEmpty || a == null) return null;
+      return ExtraScoring.compute(t.first, a).dims.where((d) => d.dim.id == dim).first.pct;
+    }
+
+    final lines = <String>[];
+    void add(String label, double? v) {
+      if (v != null) lines.add('$label: ${levelName(levelOf(v))} (${v.round()}٪)');
+    }
+
+    add('الرضا عن الحياة', pct('lifesat', 'L'));
+    add('تقدير الذات', pct('selfesteem', 'S'));
+    add('التفاؤل', pct('optimism', 'O'));
+    add('عقلية النمو', pct('growth', 'G'));
+    if (lines.isNotEmpty) lines.add('أوصاف ذاتية لحظية قد تتغير مع الظروف؛ وليست تشخيصًا. إن شعرت بضيق مستمر فاستشر مختصًا.');
+    return lines;
   }
 
   // ---------- self vs others
@@ -818,6 +898,8 @@ class IntegratedEngine {
       ],
       confidences: mainConfidences(i, cs, flags),
       extraConfidences: extraConfidences(i, cs),
+      careerLines: careerLines(i),
+      wellbeingLines: wellbeingLines(i),
     );
   }
 }

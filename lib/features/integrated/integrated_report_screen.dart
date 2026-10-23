@@ -134,6 +134,8 @@ class IntegratedReportScreen extends ConsumerWidget {
                   ]),
           ),
           if (report.contradictions.isNotEmpty) SectionCard(title: 'تناقضات محتملة', icon: Icons.compare_arrows, child: BulletList(report.contradictions)),
+          if (report.careerLines.isNotEmpty) SectionCard(title: 'الميول المهنية', icon: Icons.work_outline, child: BulletList(report.careerLines)),
+          if (report.wellbeingLines.isNotEmpty) SectionCard(title: 'الرفاه والنظرة للنفس', icon: Icons.favorite_border, child: BulletList(report.wellbeingLines)),
           SectionCard(title: 'طريقة اتخاذ القرار', icon: Icons.alt_route, child: BulletList(report.decisionLines)),
           SectionCard(
             title: 'التعامل مع الضغط',

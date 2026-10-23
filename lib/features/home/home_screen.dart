@@ -154,7 +154,7 @@ class HomeTab extends ConsumerWidget {
                 child: ListTile(
                   leading: const Icon(Icons.person_outline),
                   title: const Text('ملفي الشخصي'),
-                  subtitle: const Text('مسار الحياة، الجيل، الحيوان الأقرب، و18 اختبارًا إضافيًا'),
+                  subtitle: const Text('مسار الحياة، الجيل، الحيوان الأقرب، و28 اختبارًا إضافيًا'),
                   trailing: const Icon(Icons.chevron_left),
                   onTap: () => pushScreen(context, const ProfileScreen()),
                 ),

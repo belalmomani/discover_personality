@@ -194,6 +194,8 @@ void main() {
     expect(r.extraConfidences.length, 2);
   });
 
+  integratedNewTests();
+
   test('text export contains every section and is deterministic', () {
     final input = inp(coherent(), extras: {'bigfive': bigfiveE(5)});
     final a = IntegratedEngine.build(input).toText();
@@ -202,5 +204,95 @@ void main() {
     for (final h in ['كيف تتكامل النتائج', 'نقاط القوة', 'مصادر التعثر', 'اتخاذ القرار', 'التعامل مع الضغط', 'صورتك لدى الآخرين', 'درجة الثقة في كل نتيجة']) {
       expect(a, contains(h));
     }
+  });
+}
+
+void integratedNewTests() {
+  final qs = loadBank().questions;
+  final tests = loadExtraTests();
+  IntegratedInput inp(Map<int, int> main, Map<String, Map<int, int>> extras) => IntegratedInput(
+        questions: qs,
+        answers: main,
+        result: ScoringEngine.compute(qs, main),
+        extraTests: tests,
+        extraAnswers: extras,
+        observers: const [],
+      );
+  Map<int, int> coherent() => buildAnswers(qs, (q) {
+        switch (q.system) {
+          case AssessmentSystem.mbti:
+            final pref = {'E', 'N', 'T', 'J'}.contains(q.dimension);
+            final idx = q.id % 3;
+            return pref ? (idx == 0 ? 4 : 5) : (idx == 0 ? 2 : 1);
+          case AssessmentSystem.enneagram:
+            if (q.dimension == '5') return [5, 5, 4, 5][q.id % 4];
+            return (q.id * 7) % 3 + 1;
+          case AssessmentSystem.arfd:
+            return q.reverse ? 2 : 4;
+        }
+      });
+  Map<int, int> ex(String id, int Function(ExtraItem i) f) => {for (final i in tests.firstWhere((t) => t.id == id).items) i.id: f(i)};
+
+  group('new tests in the integrated analysis', () {
+    test('no career/wellbeing sections unless those tests were taken', () {
+      final r = IntegratedEngine.build(inp(coherent(), const {}));
+      expect(r.careerLines, isEmpty);
+      expect(r.wellbeingLines, isEmpty);
+      expect(r.toText().contains('## الميول المهنية'), isFalse);
+    });
+
+    test('RIASEC gives a Holland-style code from the three highest interests (stable tie order)', () {
+      // High I, A, S (adjusted 5); the rest low.
+      final riasec = ex('riasec', (i) => {'I', 'A', 'S'}.contains(i.dim) ? (i.reverse ? 1 : 5) : 1);
+      final r = IntegratedEngine.build(inp(coherent(), {'riasec': riasec}));
+      expect(r.careerLines.first, contains('IAS'));
+      expect(r.careerLines.join(' '), contains('ليس إرشادًا مهنيًا'));
+      expect(r.toText(), contains('## الميول المهنية'));
+    });
+
+    test('procrastination is reversed inside structure and follow-through (with its own source label)', () {
+      final proc = ex('procrast', (i) => i.reverse ? 1 : 5); // adjusted 5 => very procrastinating
+      final r = IntegratedEngine.build(inp(coherent(), {'procrast': proc}));
+      final structure = r.constructs.firstWhere((c) => c.id == 'structure');
+      final src = structure.sources.firstWhere((s) => s.label.contains('التسويف'));
+      expect(src.pct, 0); // 100 - 100
+      final follow = r.constructs.firstWhere((c) => c.id == 'follow');
+      expect(follow.sources.any((s) => s.label.contains('التسويف')), isTrue);
+    });
+
+    test('well-being lines show levels only for tests taken, with a non-diagnostic note', () {
+      final life = ex('lifesat', (i) => i.reverse ? 1 : 5);
+      final esteem = ex('selfesteem', (i) => i.reverse ? 5 : 1);
+      final r = IntegratedEngine.build(inp(coherent(), {'lifesat': life, 'selfesteem': esteem}));
+      final txt = r.wellbeingLines.join(' ');
+      expect(txt, contains('الرضا عن الحياة: مرتفع'));
+      expect(txt, contains('تقدير الذات: منخفض'));
+      expect(txt.contains('التفاؤل'), isFalse);
+      expect(txt, contains('وليست تشخيصًا'));
+    });
+
+    test('low self-esteem and low life satisfaction feed the stress-sensitivity construct (reversed)', () {
+      final esteem = ex('selfesteem', (i) => i.reverse ? 5 : 1); // adjusted 1 => pct 0
+      final r = IntegratedEngine.build(inp(coherent(), {'selfesteem': esteem}));
+      final re = r.constructs.firstWhere((c) => c.id == 'reactivity');
+      expect(re.sources.single.pct, 100);
+      expect(r.stressMeasured, isTrue);
+    });
+
+    test('emotion-regulation answers appear as coping resources in the stress section', () {
+      final big = ex('bigfive', (i) => i.dim == 'N' ? (i.reverse ? 1 : 5) : 3);
+      final reg = ex('emoreg', (i) => i.dim == 'R' ? 5 : (i.reverse ? 5 : 1));
+      final r = IntegratedEngine.build(inp(coherent(), {'bigfive': big, 'emoreg': reg}));
+      expect(r.stressLines.join(' '), contains('إعادة التقييم'));
+    });
+
+    test('empathy test feeds empathy (perspective + concern) and stress (personal distress) separately', () {
+      final emp = ex('empathy', (i) => i.dim == 'D' ? 5 : (i.dim == 'P' ? 1 : 5));
+      final r = IntegratedEngine.build(inp(coherent(), {'empathy': emp}));
+      final em = r.constructs.firstWhere((c) => c.id == 'empathy');
+      expect(em.sources.single.pct, 50); // (0 + 100) / 2
+      final re = r.constructs.firstWhere((c) => c.id == 'reactivity');
+      expect(re.sources.single.pct, 100);
+    });
   });
 }

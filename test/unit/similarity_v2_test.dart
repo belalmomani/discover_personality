@@ -11,9 +11,11 @@ void main() {
   final qs = loadBank().questions;
   final tests = loadExtraTests();
   final sql = File('supabase/migrations/20260103000000_similarity_v2.sql').readAsStringSync();
+  // Catalog rows live in two migrations: v2 (original tests) and catalog_v2 (10 added later).
+  final catalogSql = sql + File('supabase/migrations/20260106000000_catalog_v2.sql').readAsStringSync();
 
   Map<String, ({int dims, int items})> sqlCatalog() => {
-        for (final m in RegExp(r"\('((?:main|x)_\w+)', (\d+), (\d+)\)").allMatches(sql))
+        for (final m in RegExp(r"\('((?:main|x)_\w+)', (\d+), (\d+)\)").allMatches(catalogSql))
           m.group(1)!: (dims: int.parse(m.group(2)!), items: int.parse(m.group(3)!)),
       };
 
@@ -34,8 +36,8 @@ void main() {
     expect(c['main_arfd']!.items, 12);
     expect(c.containsKey('x_darktriad'), isFalse);
     expect(c.containsKey('x_attachment'), isFalse);
-    expect(c.length, 19);
-    expect(c.values.map((e) => e.items).reduce((a, b) => a + b), 288);
+    expect(c.length, 29);
+    expect(c.values.map((e) => e.items).reduce((a, b) => a + b), 363);
   });
 
   test('main vectors have the catalog sizes and stay inside 0..1', () {

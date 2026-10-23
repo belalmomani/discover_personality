@@ -10,10 +10,11 @@ void main() {
   ExtraTest byId(String id) => tests.firstWhere((t) => t.id == id);
   Map<int, int> all(ExtraTest t, int v) => {for (final i in t.items) i.id: v};
 
-  test('the 18 additional tests all exist', () {
+  test('the 28 additional tests all exist', () {
     expect(tests.map((t) => t.id).toSet(), {
       'bigfive', 'hexaco', 'disc', 'strengths', 'workstyle', 'darktriad', 'attachment', 'eq', 'resilience',
-      'locus', 'cognitive', 'values', 'moral', 'risk', 'decision', 'nfc', 'via', 'psycap'
+      'locus', 'cognitive', 'values', 'moral', 'risk', 'decision', 'nfc', 'via', 'psycap',
+      'riasec', 'grit', 'lifesat', 'selfesteem', 'optimism', 'emoreg', 'empathy', 'hsp', 'procrast', 'growth'
     });
   });
 
