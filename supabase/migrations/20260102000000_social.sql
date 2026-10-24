@@ -261,6 +261,8 @@ returns boolean language sql stable security definer set search_path = public as
                    and p.age_confirmed and not p.banned);
 $$;
 
+-- Dropped first so re-running this file after a later migration (which changed the return type) works.
+drop function if exists public.my_profile();
 create or replace function public.my_profile()
 returns table (username text, avatar_emoji text, share_results boolean, show_last_seen boolean, age_confirmed boolean, banned boolean)
 language sql stable security definer set search_path = public as $$
@@ -303,6 +305,7 @@ begin
 end;
 $$;
 
+drop function if exists public.find_similar(integer, integer);
 create or replace function public.find_similar(min_similarity integer default null, lim integer default 50)
 returns table (user_id uuid, username text, avatar_emoji text, similarity integer)
 language plpgsql stable security definer set search_path = public as $$

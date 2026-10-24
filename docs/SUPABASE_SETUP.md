@@ -1,6 +1,7 @@
 # إعداد Supabase
 
 1. أنشئ مشروعًا في supabase.com.
+2. **الأسهل: شغّل ملفًا واحدًا هو `supabase/setup_all.sql`** (يضم كل الملفات بالترتيب الصحيح، ويمكن إعادة تشغيله بأمان). الخطوات التالية (init ثم seed ثم الباقي) هي نفسها لمن يفضل تشغيلها منفصلة.
 2. SQL Editor ← الصق وشغّل `supabase/migrations/20260101000000_init.sql` ثم `supabase/seed.sql` (72 سؤالًا فقط، لا بيانات مستخدمين).
 3. Project Settings ← API: انسخ **Project URL** و**anon public key**. لا تستخدم `service_role` في التطبيق أبدًا.
 4. ضعهما في GitHub Secrets: `SUPABASE_URL` و`SUPABASE_ANON_KEY` (أو `--dart-define` محليًا).

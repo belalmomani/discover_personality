@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Static checks over the migration text (the SQL itself must still be run in Supabase).
 void main() {
+  rerunSafety();
   final sql = File('supabase/migrations/20260102000000_social.sql').readAsStringSync();
 
   test('every new table has RLS enabled', () {
@@ -63,5 +64,16 @@ void main() {
   test('no real-money or PayPal logic is present in this migration', () {
     expect(sql.toLowerCase().contains('paypal'), isFalse);
     expect(sql.toLowerCase().contains('payout'), isFalse);
+  });
+}
+
+/// Re-running the full setup after later migrations must not fail with "cannot change return type".
+void rerunSafety() {
+  final social = File('supabase/migrations/20260102000000_social.sql').readAsStringSync();
+  test('social migration drops functions whose return type a later migration changes (safe to re-run)', () {
+    expect(social, contains('drop function if exists public.my_profile();'));
+    expect(social, contains('drop function if exists public.find_similar(integer, integer);'));
+    expect(social.indexOf('drop function if exists public.my_profile();'), lessThan(social.indexOf('create or replace function public.my_profile()')));
+    expect(social.indexOf('drop function if exists public.find_similar(integer, integer);'), lessThan(social.indexOf('create or replace function public.find_similar')));
   });
 }
