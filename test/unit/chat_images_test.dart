@@ -86,8 +86,8 @@ void main() {
       expect(sql, contains('create policy chat_images_delete on storage.objects for delete to authenticated'));
       expect(sql, contains("split_part(p_name, '/', 1) <> auth.uid()::text")); // uploads only into your own folder
       expect(sql, contains('auth.uid() in (c.user_a, c.user_b)'));
-      expect(sql.contains('to anon'), isFalse);
-      expect(sql.contains('to public'), isFalse);
+      // whole-word matches only ("insert into public.messages" must not count as "to public")
+      expect(RegExp(r'(^|\s)to\s+(anon|public)\b').hasMatch(sql), isFalse);
     });
 
     test('send_image_message re-checks the stored object, blocks, bans and rate limits', () {
