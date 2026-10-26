@@ -279,4 +279,25 @@ void main() {
     expect(find.text('📷 صورة'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
+
+  testWidgets('message ticks: sent, delivered, read', (tester) async {
+    final api = FakeSocial();
+    await tester.pumpWidget(await scope(
+      const MaterialApp(home: ChatScreen(conversationId: 'c1', otherId: 'u2', otherName: 'سارة', otherEmoji: '🐬')),
+      social: api,
+    ));
+    await tester.pump();
+    ChatMessage mine(String id, {DateTime? delivered, DateTime? read}) => ChatMessage(
+        id: id, conversationId: 'c1', senderId: 'me', kind: 'text', body: 'رسالة $id', giftId: null,
+        createdAt: DateTime.utc(2026, 1, 1, 10), readAt: read, deliveredAt: delivered);
+    api.controller.add([
+      mine('a'),
+      mine('b', delivered: DateTime.utc(2026, 1, 1, 10, 1)),
+      mine('c', delivered: DateTime.utc(2026, 1, 1, 10, 1), read: DateTime.utc(2026, 1, 1, 10, 2)),
+    ]);
+    await tester.pumpAndSettle();
+    expect(find.textContaining('✓ أُرسلت'), findsOneWidget);
+    expect(find.textContaining('وصلت'), findsOneWidget);
+    expect(find.textContaining('قُرئت'), findsOneWidget);
+  });
 }

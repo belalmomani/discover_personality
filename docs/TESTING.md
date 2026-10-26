@@ -23,6 +23,8 @@
 | unit/chat_images_test | فحص توقيع الصور (JPEG/PNG/WebP فقط، 2MB)، مسار التخزين، فحص نصي لـ SQL |
 | unit/similarity_cache_test | فحص نصي لـ SQL الذاكرة المؤقتة: الخصوصية، التحديث عند التغيّر فقط، الحذف التلقائي |
 | unit/setup_all_test | أن `setup_all.sql` يطابق الملفات المنفصلة بالترتيب (لا انحراف) |
+| unit/push_moderation_test | فحص نصي لـ SQL الإشعارات والفلترة، وأمان إعادة تشغيل كل الملفات، وفحص دالة Edge (لا أسرار ولا نص رسالة) |
+| widget/push_settings_test | مفتاح الإشعارات: افتراضيًا معطل، التفعيل، غير مدعوم، رفض الإذن، الإيقاف |
 | supabase/tests/rls_check.sql | عزل RLS يدويًا في SQL Editor |
 
 **لم يُشغَّل أي اختبار من المؤلف** (لا Flutter في بيئة الكتابة).

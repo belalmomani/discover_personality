@@ -47,6 +47,17 @@ jobs:
             exit 1
           fi
 
+      - name: Prepare Firebase config (optional, enables push notifications)
+        env:
+          GS_JSON_B64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -n "$GS_JSON_B64" ]; then
+            echo "$GS_JSON_B64" | base64 -d > android/app/google-services.json
+            echo "google-services.json prepared."
+          else
+            echo "No Firebase secret: push notifications will be unavailable in this build."
+          fi
+
       - name: Patch AndroidManifest (INTERNET, label, Start.io entries)
         env:
           STARTIO_APP_ID: ${{ secrets.STARTIO_APP_ID }}
@@ -57,6 +68,10 @@ jobs:
 
       - name: Format code (applies dart format inside the runner only)
         run: dart format lib test
+
+      - name: Apply safe lint fixes (inside the runner only)
+        continue-on-error: true
+        run: dart fix --apply lib test
 
       - name: Analyze
         run: flutter analyze --no-fatal-infos

@@ -91,3 +91,31 @@ if os.path.exists("android/key.properties"):
             print("release signing configured in", bf)
         else:
             print("release signing already configured")
+
+# ---- Push notifications: POST_NOTIFICATIONS permission (Android 13+) and, only if a Firebase config file exists,
+#      the Google Services Gradle plugin. Without google-services.json the app builds and runs; push is "unsupported".
+mp = "android/app/src/main/AndroidManifest.xml"
+m = open(mp, encoding="utf-8").read()
+if "android.permission.POST_NOTIFICATIONS" not in m:
+    m = m.replace("<application", '<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <application', 1)
+    open(mp, "w", encoding="utf-8").write(m)
+    print("POST_NOTIFICATIONS added")
+
+if os.path.exists("android/app/google-services.json"):
+    sf = "android/settings.gradle"
+    if os.path.exists(sf):
+        t = open(sf, encoding="utf-8").read()
+        if "com.google.gms.google-services" not in t:
+            t = re.sub(r'(id "org\.jetbrains\.kotlin\.android" version "[^"]+" apply false)',
+                       r'\1\n    id "com.google.gms.google-services" version "4.4.2" apply false', t, count=1)
+            open(sf, "w", encoding="utf-8").write(t)
+            print("google-services plugin declared in settings.gradle")
+    bf = "android/app/build.gradle"
+    if os.path.exists(bf):
+        t = open(bf, encoding="utf-8").read()
+        if 'id "com.google.gms.google-services"' not in t:
+            t = re.sub(r'(id "com\.android\.application")', r'\1\n    id "com.google.gms.google-services"', t, count=1)
+            open(bf, "w", encoding="utf-8").write(t)
+            print("google-services plugin applied in app/build.gradle")
+else:
+    print("no google-services.json: push notifications stay disabled in this build")

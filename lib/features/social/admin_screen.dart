@@ -13,18 +13,19 @@ class AdminScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('لوحة الإدارة'),
           bottom: const TabBar(isScrollable: true, tabs: [
             Tab(text: 'الهدايا'),
             Tab(text: 'البلاغات'),
+            Tab(text: 'الكلمات الممنوعة'),
             Tab(text: 'الإعدادات'),
             Tab(text: 'الإحصاءات'),
           ]),
         ),
-        body: const SafeArea(child: TabBarView(children: [_GiftsTab(), _ReportsTab(), _SettingsTab(), _StatsTab()])),
+        body: const SafeArea(child: TabBarView(children: [_GiftsTab(), _ReportsTab(), _TermsTab(), _SettingsTab(), _StatsTab()])),
       ),
     );
   }
@@ -191,6 +192,7 @@ class _ReportsTabState extends ConsumerState<_ReportsTab> {
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text('المُبلَّغ عنه: ${r.reported} • المُبلِّغ: ${r.reporter}'),
                 Text('السبب: ${r.reason}'),
+                if (r.reportsAgainst > 1) Text('عدد المبلّغين عنه (بلاغات مفتوحة): ${r.reportsAgainst}', style: const TextStyle(fontWeight: FontWeight.bold)),
                 if (r.messageBody != null) Text('الرسالة: ${r.messageBody}'),
                 const SizedBox(height: 8),
                 Wrap(spacing: 8, children: [
@@ -203,6 +205,84 @@ class _ReportsTabState extends ConsumerState<_ReportsTab> {
           ),
       ]),
     );
+  }
+}
+
+class _TermsTab extends ConsumerStatefulWidget {
+  const _TermsTab();
+  @override
+  ConsumerState<_TermsTab> createState() => _TermsTabState();
+}
+
+class _TermsTabState extends ConsumerState<_TermsTab> {
+  List<String>? _terms;
+  String? _error;
+  final _c = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    try {
+      final t = await ref.read(socialApiProvider).blockedTerms();
+      if (mounted) setState(() {
+            _terms = t;
+            _error = null;
+          });
+    } catch (e) {
+      if (mounted) setState(() => _error = socialErrorMessage(e));
+    }
+  }
+
+  Future<void> _add() async {
+    final t = _c.text.trim();
+    if (t.length < 2) {
+      showMessage(context, 'اكتب كلمة من حرفين فأكثر.');
+      return;
+    }
+    try {
+      await ref.read(socialApiProvider).addBlockedTerm(t);
+      _c.clear();
+      await _load();
+    } catch (e) {
+      if (mounted) showMessage(context, socialErrorMessage(e));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_error != null) return ErrorView(message: _error!, onRetry: _load);
+    if (_terms == null) return const LoadingView();
+    return ListView(padding: const EdgeInsets.all(12), children: [
+      const Text('أي رسالة نصية تحتوي إحدى هذه الكلمات تُرفض تلقائيًا على الخادم. المطابقة بالاحتواء بعد التحويل للأحرف الصغيرة، فاختر كلمات محددة لتقليل الرفض الخاطئ.', style: TextStyle(fontSize: 12)),
+      const SizedBox(height: 8),
+      Row(children: [
+        Expanded(child: TextField(controller: _c, maxLength: 50, decoration: const InputDecoration(hintText: 'كلمة ممنوعة', counterText: '', border: OutlineInputBorder()))),
+        const SizedBox(width: 8),
+        FilledButton(onPressed: _add, child: const Text('إضافة')),
+      ]),
+      const SizedBox(height: 8),
+      if (_terms!.isEmpty) const Text('لا توجد كلمات ممنوعة بعد.'),
+      Wrap(spacing: 8, runSpacing: 4, children: [
+        for (final t in _terms!)
+          InputChip(
+            label: Text(t),
+            onDeleted: () async {
+              await ref.read(socialApiProvider).removeBlockedTerm(t);
+              await _load();
+            },
+          ),
+      ]),
+    ]);
   }
 }
 
@@ -221,6 +301,7 @@ class _SettingsTabState extends ConsumerState<_SettingsTab> {
     'free_gift_daily_limit': 'حد الهدايا المجانية يوميًا',
     'reward_rate_percent': 'نسبة نقاط المكافآت للمستلم من سعر الهدية (٪)',
     'chat_min_similarity': 'الحد الأدنى لنسبة التشابه للدردشة (٪)',
+    'block_links': 'منع الروابط في الرسائل (1 = نعم، 0 = لا)',
   };
 
   @override

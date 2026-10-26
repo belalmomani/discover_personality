@@ -40,6 +40,15 @@ abstract class SocialApi {
   /// Short-lived signed URL for an image message path.
   Future<String> imageUrl(String path);
   Future<void> markRead(String conversationId);
+
+  /// Marks every message addressed to me as delivered ("وصلت").
+  Future<void> markDelivered();
+
+  // Push notifications (the token is registered only after the user switches notifications on)
+  Future<void> registerPushToken(String token);
+  Future<void> unregisterPushToken(String token);
+  Future<void> disablePush();
+  Future<bool> myPushEnabled();
   Future<void> touchPresence();
   Future<void> block(String userId);
   Future<void> unblock(String userId);
@@ -61,6 +70,9 @@ abstract class SocialApi {
   Future<Map<String, String>> settings();
   Future<void> setSetting(String key, String value);
   Future<Map<String, dynamic>> stats();
+  Future<List<String>> blockedTerms();
+  Future<void> addBlockedTerm(String term);
+  Future<void> removeBlockedTerm(String term);
 }
 
 class NoSocialApi implements SocialApi {
@@ -91,6 +103,16 @@ class NoSocialApi implements SocialApi {
   Future<String> imageUrl(String path) async => _off();
   @override
   Future<void> markRead(String conversationId) async {}
+  @override
+  Future<void> markDelivered() async {}
+  @override
+  Future<void> registerPushToken(String token) async => _off();
+  @override
+  Future<void> unregisterPushToken(String token) async {}
+  @override
+  Future<void> disablePush() async {}
+  @override
+  Future<bool> myPushEnabled() async => false;
   @override
   Future<void> touchPresence() async {}
   @override
@@ -127,6 +149,12 @@ class NoSocialApi implements SocialApi {
   Future<void> setSetting(String key, String value) async => _off();
   @override
   Future<Map<String, dynamic>> stats() async => _off();
+  @override
+  Future<List<String>> blockedTerms() async => _off();
+  @override
+  Future<void> addBlockedTerm(String term) async => _off();
+  @override
+  Future<void> removeBlockedTerm(String term) async => _off();
 }
 
 class SupabaseSocialApi implements SocialApi {
@@ -226,6 +254,29 @@ class SupabaseSocialApi implements SocialApi {
   }
 
   @override
+  Future<void> markDelivered() async {
+    await _c.rpc('mark_delivered');
+  }
+
+  @override
+  Future<void> registerPushToken(String token) async {
+    await _c.rpc('register_push_token', params: {'p_token': token, 'p_platform': 'android'});
+  }
+
+  @override
+  Future<void> unregisterPushToken(String token) async {
+    await _c.rpc('unregister_push_token', params: {'p_token': token});
+  }
+
+  @override
+  Future<void> disablePush() async {
+    await _c.rpc('disable_push');
+  }
+
+  @override
+  Future<bool> myPushEnabled() async => ((await _c.rpc('my_push_enabled')) as bool?) ?? false;
+
+  @override
   Future<void> touchPresence() async {
     await _c.rpc('touch_presence');
   }
@@ -320,4 +371,17 @@ class SupabaseSocialApi implements SocialApi {
 
   @override
   Future<Map<String, dynamic>> stats() async => Map<String, dynamic>.from((await _c.rpc('admin_stats')) as Map);
+
+  @override
+  Future<List<String>> blockedTerms() async => [for (final r in _rows(await _c.rpc('admin_list_terms'))) r['term'] as String];
+
+  @override
+  Future<void> addBlockedTerm(String term) async {
+    await _c.rpc('admin_add_term', params: {'p_term': term});
+  }
+
+  @override
+  Future<void> removeBlockedTerm(String term) async {
+    await _c.rpc('admin_remove_term', params: {'p_term': term});
+  }
 }

@@ -10,6 +10,7 @@ ORDER = [
     "supabase/migrations/20260104000000_chat_images.sql",
     "supabase/migrations/20260105000000_similarity_cache.sql",
     "supabase/migrations/20260106000000_catalog_v2.sql",
+    "supabase/migrations/20260107000000_push_moderation.sql",
 ]
 
 parts = [

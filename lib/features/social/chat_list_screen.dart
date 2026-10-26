@@ -40,6 +40,7 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen> {
     if (!api.available) return;
     try {
       final r = await api.conversations();
+      api.markDelivered().catchError((Object _) {}); // messages addressed to me have now reached this device
       if (mounted) setState(() {
             _items = r;
             _error = null;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,17 +17,53 @@ import '../profile/profile_screen.dart';
 import '../results/results_screen.dart';
 import '../settings/settings_screen.dart';
 import '../social/chat_list_screen.dart';
+import '../social/chat_screen.dart';
 import '../social/community_screen.dart';
 
 /// App shell: bottom navigation (Home / People like you / Chats).
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _index = 0;
+  StreamSubscription<String>? _pushSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _initPush();
+  }
+
+  /// Only if the user already switched notifications on: listen for taps to open the chat.
+  Future<void> _initPush() async {
+    final api = ref.read(socialApiProvider);
+    if (!api.available) return;
+    try {
+      if (!await api.myPushEnabled() || !mounted) return;
+      final push = ref.read(pushServiceProvider);
+      await push.startListening(api);
+      _pushSub = push.openConversation.listen(_openChat);
+    } catch (_) {}
+  }
+
+  Future<void> _openChat(String conversationId) async {
+    try {
+      final list = await ref.read(socialApiProvider).conversations();
+      final c = list.where((x) => x.id == conversationId);
+      if (c.isEmpty || !mounted) return;
+      final x = c.first;
+      pushScreen(context, ChatScreen(conversationId: x.id, otherId: x.otherId, otherName: x.otherUsername, otherEmoji: x.otherEmoji, lastSeen: x.lastSeen));
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _pushSub?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -225,7 +225,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             const SizedBox(height: 2),
                             Row(mainAxisSize: MainAxisSize.min, children: [
                               Text(_hhmm(m.createdAt), style: const TextStyle(fontSize: 10)),
-                              if (mine) ...[const SizedBox(width: 4), Text(m.isRead ? '✓✓ قُرئت' : '✓ أُرسلت', style: const TextStyle(fontSize: 10))],
+                              if (mine) ...[const SizedBox(width: 4), Text(m.isRead ? '✓✓ قُرئت' : (m.isDelivered ? '✓✓ وصلت' : '✓ أُرسلت'), style: const TextStyle(fontSize: 10))],
                             ]),
                           ]),
                         ),

@@ -119,7 +119,9 @@ class ChatMessage {
     required this.giftId,
     required this.createdAt,
     required this.readAt,
+    this.deliveredAt,
   });
+  final DateTime? deliveredAt;
   final String id;
   final String conversationId;
   final String senderId;
@@ -133,6 +135,9 @@ class ChatMessage {
   bool get isImage => kind == 'image';
   bool get isRead => readAt != null;
 
+  /// Reached the recipient's app (a read message is always delivered).
+  bool get isDelivered => deliveredAt != null || readAt != null;
+
   factory ChatMessage.fromJson(Map<String, dynamic> j) => ChatMessage(
         id: j['id'] as String,
         conversationId: j['conversation_id'] as String,
@@ -142,6 +147,7 @@ class ChatMessage {
         giftId: j['gift_id'] as String?,
         createdAt: DateTime.parse(j['created_at'] as String),
         readAt: j['read_at'] == null ? null : DateTime.parse(j['read_at'] as String),
+        deliveredAt: j['delivered_at'] == null ? null : DateTime.parse(j['delivered_at'] as String),
       );
 }
 
@@ -221,7 +227,11 @@ class ReportRow {
     required this.reason,
     required this.status,
     required this.createdAt,
+    this.reportsAgainst = 0,
   });
+
+  /// Distinct people with an OPEN report against the same user (helps prioritising).
+  final int reportsAgainst;
   final String id;
   final String reporter;
   final String reportedId;
@@ -240,6 +250,7 @@ class ReportRow {
         reason: j['reason'] as String,
         status: j['status'] as String,
         createdAt: DateTime.parse(j['created_at'] as String),
+        reportsAgainst: ((j['reports_against'] as num?) ?? 0).toInt(),
       );
 }
 
@@ -280,6 +291,8 @@ String socialErrorMessage(Object e) {
     'invalid_message': 'الرسالة فارغة أو أطول من 1000 حرف.',
     'forbidden': 'غير مسموح لك بهذا الإجراء.',
     'chat_disabled': 'الدردشة مغلقة عند أحد الطرفين.',
+    'content_blocked': 'الرسالة تحتوي كلمات غير مسموحة.',
+    'links_blocked': 'مشاركة الروابط غير مسموحة في الدردشة.',
     'invalid_image': 'الصورة غير مدعومة أو أكبر من 2 ميجابايت (JPEG أو PNG أو WebP فقط).',
     'image_limit': 'وصلت إلى الحد الأقصى للصور في الساعة. حاول لاحقًا.',
     'not_authenticated': 'سجّل الدخول أولًا.',

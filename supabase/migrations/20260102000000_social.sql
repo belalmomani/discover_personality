@@ -528,6 +528,7 @@ end;
 $$;
 
 -- ---------- admin
+drop function if exists public.admin_list_reports(text);
 create or replace function public.admin_list_reports(p_status text default 'open')
 returns table (id uuid, reporter text, reported_id uuid, reported text, message_body text, reason text, status text, created_at timestamptz)
 language plpgsql stable security definer set search_path = public as $$

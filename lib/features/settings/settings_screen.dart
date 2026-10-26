@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../core/config.dart';
+import '../../data/push/push_service.dart';
 import '../auth/auth_screen.dart';
 import '../help/help_screen.dart';
 import '../privacy/privacy_screen.dart';
@@ -50,6 +51,7 @@ class SettingsScreen extends ConsumerWidget {
               onSelectionChanged: (s) => notifier.setTheme(s.first),
             ),
           ),
+          if (ref.watch(socialApiProvider).available) const _PushTile(),
           SectionCard(
             title: 'الحساب والمزامنة (اختياري)',
             icon: Icons.cloud_outlined,
@@ -150,4 +152,67 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+
+/// Chat notifications switch. Notification text never includes the message itself.
+class _PushTile extends ConsumerStatefulWidget {
+  const _PushTile();
+  @override
+  ConsumerState<_PushTile> createState() => _PushTileState();
+}
+
+class _PushTileState extends ConsumerState<_PushTile> {
+  bool _on = false;
+  bool _busy = true;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(socialApiProvider).myPushEnabled().then((v) {
+      if (mounted) setState(() {
+            _on = v;
+            _busy = false;
+          });
+    }).catchError((Object _) {
+      if (mounted) setState(() => _busy = false);
+    });
+  }
+
+  Future<void> _toggle(bool v) async {
+    setState(() => _busy = true);
+    final api = ref.read(socialApiProvider);
+    final push = ref.read(pushServiceProvider);
+    String? message;
+    var on = _on;
+    if (v) {
+      final r = await push.enable(api);
+      on = r == PushResult.enabled;
+      if (r == PushResult.unsupported) message = 'الإشعارات غير مفعّلة في هذه النسخة (تحتاج إعداد Firebase).';
+      if (r == PushResult.denied) message = 'رفضتَ إذن الإشعارات؛ فعّله من إعدادات الهاتف ثم أعد المحاولة.';
+      if (r == PushResult.failed) message = 'تعذر تفعيل الإشعارات الآن. حاول لاحقًا.';
+    } else {
+      await push.disable(api);
+      on = false;
+    }
+    if (!mounted) return;
+    setState(() {
+      _on = on;
+      _busy = false;
+    });
+    if (message != null) showMessage(context, message);
+  }
+
+  @override
+  Widget build(BuildContext context) => SectionCard(
+        title: 'إشعارات الدردشة',
+        icon: Icons.notifications_outlined,
+        child: SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _on,
+          onChanged: _busy ? null : _toggle,
+          title: const Text('تنبيهي عند وصول رسالة جديدة'),
+          subtitle: const Text('لا يظهر نص الرسالة في الإشعار حفاظًا على خصوصيتك.'),
+        ),
+      );
 }

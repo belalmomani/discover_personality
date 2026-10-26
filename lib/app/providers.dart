@@ -17,6 +17,8 @@ import '../data/report/plan_generator.dart';
 import '../data/repositories/local_store.dart';
 import '../data/scoring/scoring_engine.dart';
 import '../data/services/sync_service.dart';
+import '../data/push/firebase_push_service.dart';
+import '../data/push/push_service.dart';
 import '../data/social/social_api.dart';
 import '../data/supabase/cloud_api.dart';
 
@@ -270,6 +272,9 @@ final profileProvider =
 
 // ---- Social layer (similar people, chat, gifts). Off unless Supabase is configured.
 final socialApiProvider = Provider<SocialApi>((ref) => NoSocialApi());
+
+// Push notifications (needs a Firebase project; otherwise reports "unsupported").
+final pushServiceProvider = Provider<PushService>((ref) => FirebasePushService());
 
 // ---- Ratings from other people about the user (device-only)
 class ObserversNotifier extends StateNotifier<List<ObserverRating>> {
