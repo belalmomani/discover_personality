@@ -280,6 +280,9 @@ String socialErrorMessage(Object e) {
     'already_claimed': 'حصلت على عملات اليوم بالفعل. عد غدًا.',
     'daily_coins_disabled': 'العملات اليومية غير مفعّلة حاليًا.',
     'gift_unavailable': 'هذه الهدية غير متاحة حاليًا.',
+    // Longer codes first: the lookup uses contains(), and 'blocked' is a substring of both.
+    'content_blocked': 'الرسالة تحتوي كلمات غير مسموحة.',
+    'links_blocked': 'مشاركة الروابط غير مسموحة في الدردشة.',
     'blocked': 'لا يمكن التواصل مع هذا المستخدم.',
     'banned': 'حسابك موقوف.',
     'rate_limited': 'أرسلت عددًا كبيرًا من الطلبات. انتظر قليلًا.',
@@ -291,8 +294,6 @@ String socialErrorMessage(Object e) {
     'invalid_message': 'الرسالة فارغة أو أطول من 1000 حرف.',
     'forbidden': 'غير مسموح لك بهذا الإجراء.',
     'chat_disabled': 'الدردشة مغلقة عند أحد الطرفين.',
-    'content_blocked': 'الرسالة تحتوي كلمات غير مسموحة.',
-    'links_blocked': 'مشاركة الروابط غير مسموحة في الدردشة.',
     'invalid_image': 'الصورة غير مدعومة أو أكبر من 2 ميجابايت (JPEG أو PNG أو WebP فقط).',
     'image_limit': 'وصلت إلى الحد الأقصى للصور في الساعة. حاول لاحقًا.',
     'not_authenticated': 'سجّل الدخول أولًا.',
