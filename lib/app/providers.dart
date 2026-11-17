@@ -58,7 +58,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
   Future<void> setTheme(ThemeMode m) => _set(state.copyWith(themeMode: m));
   Future<void> setAiConsent(bool v) => _set(state.copyWith(aiConsent: v));
-  Future<void> setAdsConsent(bool v) => _set(state.copyWith(adsConsent: v));
+  Future<void> setAdsConsent(bool v) => _set(state.copyWith(adsConsent: v, adsAsked: true));
   Future<void> completeOnboarding() => _set(state.copyWith(onboardingDone: true));
 }
 

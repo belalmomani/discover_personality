@@ -79,32 +79,54 @@ jobs:
       - name: Test
         run: flutter test
 
-      - name: Build release APK
+      - name: Release checklist warnings
+        env:
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+          STARTIO_APP_ID: ${{ secrets.STARTIO_APP_ID }}
+          STARTIO_TEST_MODE: ${{ vars.STARTIO_TEST_MODE || 'true' }}
+        run: |
+          [ -z "$CONTACT_EMAIL" ] && echo "::warning::Repository variable CONTACT_EMAIL is not set: the privacy policy will show a placeholder e-mail (Google Play rejects that)."
+          [ -z "$STARTIO_APP_ID" ] && echo "::warning::Secret STARTIO_APP_ID is not set: the default Start.io App ID from tool/patch_android.py is used."
+          [ "$STARTIO_TEST_MODE" = "true" ] && echo "::warning::STARTIO_TEST_MODE=true: only TEST ads are shown. Set repository variable STARTIO_TEST_MODE=false for the Play Store release."
+          exit 0
+
+      - name: Build release APK and AAB
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           AI_PROXY_URL: ${{ secrets.AI_PROXY_URL }}
+          ADS_ENABLED: ${{ vars.ADS_ENABLED || 'true' }}
+          STARTIO_TEST_MODE: ${{ vars.STARTIO_TEST_MODE || 'true' }}
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
         run: |
-          flutter build apk --release \
-            --build-name=1.0.${{ github.run_number }} \
-            --build-number=${{ github.run_number }} \
-            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
-            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
-            --dart-define=AI_PROXY_URL="$AI_PROXY_URL" \
-            --dart-define=ADS_ENABLED=false \
-            --dart-define=STARTIO_TEST_MODE=true
+          DEFINES=(
+            --build-name=1.0.${{ github.run_number }}
+            --build-number=${{ github.run_number }}
+            --dart-define=SUPABASE_URL="$SUPABASE_URL"
+            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY"
+            --dart-define=AI_PROXY_URL="$AI_PROXY_URL"
+            --dart-define=ADS_ENABLED="$ADS_ENABLED"
+            --dart-define=STARTIO_TEST_MODE="$STARTIO_TEST_MODE"
+            --dart-define=CONTACT_EMAIL="$CONTACT_EMAIL"
+          )
+          flutter build apk --release "${DEFINES[@]}"
+          flutter build appbundle --release "${DEFINES[@]}"
 
-      - name: Upload APK
+      - name: Upload APK and AAB
         uses: actions/upload-artifact@v4
         with:
-          name: discover-personality-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: discover-personality-release
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
           if-no-files-found: error
 
-      - name: Publish APK as a GitHub Release (direct .apk download, no zip)
+      - name: Publish APK + AAB as a GitHub Release (direct download, no zip)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
           name: "Build ${{ github.run_number }} (v1.0.${{ github.run_number }})"
-          files: build/app/outputs/flutter-apk/app-release.apk
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
           prerelease: true

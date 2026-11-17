@@ -62,5 +62,14 @@ void main() {
     final s = store.loadSettings();
     expect(s.adsConsent, isFalse);
     expect(s.aiConsent, isFalse);
+    expect(s.adsAsked, isFalse);
+  });
+
+  test('answering the ads question is remembered', () async {
+    final store = await freshStore();
+    await store.saveSettings(const AppSettings(adsConsent: true, adsAsked: true));
+    final s = store.loadSettings();
+    expect(s.adsConsent, isTrue);
+    expect(s.adsAsked, isTrue);
   });
 }

@@ -10,7 +10,7 @@ path = "android/app/src/main/AndroidManifest.xml"
 if not os.path.exists(path):
     sys.exit("AndroidManifest.xml not found: run flutter create first")
 s = open(path, encoding="utf-8").read()
-app_id = os.environ.get("STARTIO_APP_ID", "").strip() or "209978600"
+app_id = os.environ.get("STARTIO_APP_ID", "").strip() or "210949713"
 
 if "android.permission.INTERNET" not in s:
     s = s.replace("<application", '<uses-permission android:name="android.permission.INTERNET"/>\n    <application', 1)
@@ -50,6 +50,10 @@ sub_file("android/gradle/wrapper/gradle-wrapper.properties",
          r'gradle-[0-9.]+-(all|bin)\.zip', r'gradle-8.9-all.zip', "Gradle 8.9")
 for bf in ("android/app/build.gradle", "android/app/build.gradle.kts"):
     sub_file(bf, r'compileSdk(Version)?\s*=?\s*(flutter\.compileSdkVersion|\d+)', 'compileSdk = 36', "compileSdk 36")
+
+# Google Play: new apps/updates must target Android 16 (API 36) since 2026-08-31.
+for bf in ("android/app/build.gradle", "android/app/build.gradle.kts"):
+    sub_file(bf, r'targetSdk(Version)?\s*=?\s*(flutter\.targetSdkVersion|\d+)', 'targetSdk = 36', "targetSdk 36")
 
 # minSdk 23 (required by com.startapp:inapp-sdk 5.4.0) and NDK 27 (required by several plugins).
 for bf in ("android/app/build.gradle", "android/app/build.gradle.kts"):
@@ -91,6 +95,14 @@ if os.path.exists("android/key.properties"):
             print("release signing configured in", bf)
         else:
             print("release signing already configured")
+
+# ---- Advertising ID (Android 13+ needs this declared when an ad SDK reads the advertising ID)
+mp2 = "android/app/src/main/AndroidManifest.xml"
+m2 = open(mp2, encoding="utf-8").read()
+if "com.google.android.gms.permission.AD_ID" not in m2:
+    m2 = m2.replace("<application", '<uses-permission android:name="com.google.android.gms.permission.AD_ID"/>\n    <application', 1)
+    open(mp2, "w", encoding="utf-8").write(m2)
+    print("AD_ID permission added")
 
 # ---- Push notifications: POST_NOTIFICATIONS permission (Android 13+) and, only if a Firebase config file exists,
 #      the Google Services Gradle plugin. Without google-services.json the app builds and runs; push is "unsupported".

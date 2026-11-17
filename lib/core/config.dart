@@ -18,7 +18,11 @@ class AppConfig {
   /// Optional AI proxy endpoint (never an AI provider key).
   static const String aiProxyUrl = String.fromEnvironment('AI_PROXY_URL');
 
-  static const String privacyContactEmail = 'ADD_CONTACT_EMAIL_BEFORE_PUBLISHING';
+  static const String _contactEmail = String.fromEnvironment('CONTACT_EMAIL');
+
+  /// Public contact e-mail shown in the privacy policy. Set CONTACT_EMAIL (GitHub variable) before release.
+  static String get privacyContactEmail =>
+      _contactEmail.isNotEmpty ? _contactEmail : 'ADD_CONTACT_EMAIL_BEFORE_PUBLISHING';
 
   /// Bump when scoring rules change.
   static const int scoringVersion = 1;
