@@ -307,6 +307,8 @@ String socialErrorMessage(Object e) {
   final code = RegExp(r'code:\s*([A-Za-z0-9_]{2,12})').firstMatch(t)?.group(1);
   final msg = RegExp(r'message:\s*(.{1,80}?)(?=,\s*(?:code|details|hint):|\)?\s*$)').firstMatch(t)?.group(1)?.trim();
   final safe = msg != null && !RegExp(r'(sb_|eyJ|https?://)').hasMatch(msg);
-  final hint = [if (code != null) code, if (safe) msg].join(' • ');
+  var hint = [if (code != null) code, if (safe) msg].join(' • ');
+  // Nothing extractable (e.g. network or parsing failure): show only the exception TYPE, never its text.
+  if (hint.isEmpty) hint = e.runtimeType.toString();
   return 'تعذر تنفيذ العملية. تحقق من اتصالك وحاول مجددًا.${hint.isEmpty ? "" : "\n(رمز تقني: $hint)"}';
 }
