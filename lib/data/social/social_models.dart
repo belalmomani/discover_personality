@@ -297,8 +297,10 @@ String socialErrorMessage(Object e) {
     'image_limit': 'وصلت إلى الحد الأقصى للصور في الساعة. حاول لاحقًا.',
     'not_authenticated': 'سجّل الدخول أولًا.',
   };
-  for (final entry in map.entries) {
-    if (t.contains(entry.key)) return entry.value;
+  // Longest key first: 'content_blocked' and 'links_blocked' must win over the generic 'blocked'.
+  final keys = map.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
+  for (final k in keys) {
+    if (t.contains(k)) return map[k]!;
   }
   // Unknown error: show only a short technical hint (code + brief message) to help diagnose,
   // never a stack trace, URL or key.
