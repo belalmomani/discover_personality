@@ -35,7 +35,8 @@ open(path, "w", encoding="utf-8").write(s)
 print("patched", path, "(Start.io app id:", "set" if app_id != "YOUR_STARTIO_APP_ID" else "PLACEHOLDER", ")")
 
 # ---- Build tooling bump: startapp's native SDK (com.startapp:inapp-sdk 5.4.0) requires compileSdk 36,
-# which needs a newer Android Gradle Plugin / Gradle than the Flutter 3.27.4 template (AGP 8.1.0, Gradle 8.3).
+# which needs a newer Android Gradle Plugin / Gradle than the Flutter template. Current androidx releases (core 1.18, activity 1.12,
+# browser 1.9) require AGP >= 8.9.1, which needs Gradle >= 8.11.1.
 def sub_file(p, pattern, repl, label):
     if not os.path.exists(p):
         print("skip (missing):", p); return
@@ -45,9 +46,9 @@ def sub_file(p, pattern, repl, label):
     print(label, "->", "changed" if c else "no match (already ok?)", p)
 
 for sf in ("android/settings.gradle", "android/settings.gradle.kts"):
-    sub_file(sf, r'(com\.android\.application"\)?\s*version\s*"?)[0-9.]+', r'\g<1>8.7.3', "AGP 8.7.3")
+    sub_file(sf, r'(com\.android\.application"\)?\s*version\s*"?)[0-9.]+', r'\g<1>8.9.1', "AGP 8.9.1")
 sub_file("android/gradle/wrapper/gradle-wrapper.properties",
-         r'gradle-[0-9.]+-(all|bin)\.zip', r'gradle-8.9-all.zip', "Gradle 8.9")
+         r'gradle-[0-9.]+-(all|bin)\.zip', r'gradle-8.11.1-all.zip', "Gradle 8.11.1")
 for bf in ("android/app/build.gradle", "android/app/build.gradle.kts"):
     sub_file(bf, r'compileSdk(Version)?\s*=?\s*(flutter\.compileSdkVersion|\d+)', 'compileSdk = 36', "compileSdk 36")
 

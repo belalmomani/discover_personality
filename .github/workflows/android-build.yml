@@ -130,16 +130,24 @@ jobs:
 
       - name: Build release AAB (the format Google Play requires)
         env:
+          # Release 1 on Google Play is local-only: Supabase is NOT compiled in (no accounts, chat or sync) unless the
+          # repository variable PLAY_ENABLE_SOCIAL is set to "true" (Settings > Secrets and variables > Actions > Variables).
+          PLAY_SOCIAL: ${{ vars.PLAY_ENABLE_SOCIAL }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           AI_PROXY_URL: ${{ secrets.AI_PROXY_URL }}
         run: |
+          if [ "$PLAY_SOCIAL" = "true" ]; then
+            echo "::warning::PLAY_ENABLE_SOCIAL=true: this bundle includes accounts, chat and sync (privacy policy, Data safety and UGC rules must cover them)."
+            DEFS="--dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY --dart-define=AI_PROXY_URL=$AI_PROXY_URL"
+          else
+            echo "Local-only Play bundle (no Supabase, no AI proxy)."
+            DEFS=""
+          fi
           flutter build appbundle --release \
             --build-name=1.0.${{ github.run_number }} \
             --build-number=${{ github.run_number }} \
-            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
-            --dart-define=SUPABASE_ANON_KEY="$SUPABASE_ANON_KEY" \
-            --dart-define=AI_PROXY_URL="$AI_PROXY_URL" \
+            $DEFS \
             --dart-define=ADS_ENABLED=false \
             --dart-define=STARTIO_TEST_MODE=true
 
