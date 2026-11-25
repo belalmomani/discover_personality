@@ -96,6 +96,45 @@ if os.path.exists("android/key.properties"):
         else:
             print("release signing already configured")
 
+# ---- Kotlin DSL (Flutter >= 3.29 scaffolds android/app/build.gradle.kts): release signing + kotlinOptions migration
+kts = "android/app/build.gradle.kts"
+if os.path.exists(kts):
+    g = open(kts, encoding="utf-8").read()
+    if os.path.exists("android/key.properties") and "keystoreProperties" not in g:
+        if "import java.util.Properties" not in g:
+            g = "import java.io.FileInputStream\nimport java.util.Properties\n\n" + g
+        loader = (
+            'val keystoreProperties = Properties()\n'
+            'val keystorePropertiesFile = rootProject.file("key.properties")\n'
+            'if (keystorePropertiesFile.exists()) {\n'
+            '    keystoreProperties.load(FileInputStream(keystorePropertiesFile))\n'
+            '}\n\n'
+        )
+        g = re.sub(r'^android \{', lambda m: loader + 'android {', g, count=1, flags=re.M)
+        signing = (
+            '    signingConfigs {\n'
+            '        create("release") {\n'
+            '            keyAlias = keystoreProperties["keyAlias"] as String\n'
+            '            keyPassword = keystoreProperties["keyPassword"] as String\n'
+            '            storeFile = (keystoreProperties["storeFile"] as String?)?.let { file(it) }\n'
+            '            storePassword = keystoreProperties["storePassword"] as String\n'
+            '        }\n'
+            '    }\n\n'
+        )
+        g = g.replace("    buildTypes {", signing + "    buildTypes {", 1)
+        g, c = re.subn(r'signingConfig\s*=\s*signingConfigs\.getByName\("debug"\)', 'signingConfig = signingConfigs.getByName("release")', g)
+        print("release signing configured in", kts, "(release config switched:", bool(c), ")")
+    # kotlinOptions{} is an error in newer Kotlin Gradle plugins (we force 2.3.0): move it to compilerOptions.
+    m = re.search(r'\n[ \t]*kotlinOptions\s*\{[^}]*\}[ \t]*\n', g)
+    if m:
+        jv = re.search(r'JavaVersion\.VERSION_(\d+)', g)
+        target = jv.group(1) if jv else "11"
+        g = g.replace(m.group(0), "\n", 1)
+        g += ('\nkotlin {\n    compilerOptions {\n'
+              '        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_%s)\n    }\n}\n' % target)
+        print("kotlinOptions migrated to compilerOptions (JVM", target, ")")
+    open(kts, "w", encoding="utf-8").write(g)
+
 # ---- Push notifications: POST_NOTIFICATIONS permission (Android 13+) and, only if a Firebase config file exists,
 #      the Google Services Gradle plugin. Without google-services.json the app builds and runs; push is "unsupported".
 mp = "android/app/src/main/AndroidManifest.xml"
@@ -121,5 +160,20 @@ if os.path.exists("android/app/google-services.json"):
             t = re.sub(r'(id "com\.android\.application")', r'\1\n    id "com.google.gms.google-services"', t, count=1)
             open(bf, "w", encoding="utf-8").write(t)
             print("google-services plugin applied in app/build.gradle")
+    sk = "android/settings.gradle.kts"
+    if os.path.exists(sk):
+        t = open(sk, encoding="utf-8").read()
+        if "com.google.gms.google-services" not in t:
+            t = re.sub(r'(id\("org\.jetbrains\.kotlin\.android"\) version "[^"]+" apply false)',
+                       r'\1\n    id("com.google.gms.google-services") version "4.4.2" apply false', t, count=1)
+            open(sk, "w", encoding="utf-8").write(t)
+            print("google-services plugin declared in settings.gradle.kts")
+    bk = "android/app/build.gradle.kts"
+    if os.path.exists(bk):
+        t = open(bk, encoding="utf-8").read()
+        if 'id("com.google.gms.google-services")' not in t:
+            t = re.sub(r'(id\("com\.android\.application"\))', r'\1\n    id("com.google.gms.google-services")', t, count=1)
+            open(bk, "w", encoding="utf-8").write(t)
+            print("google-services plugin applied in app/build.gradle.kts")
 else:
     print("no google-services.json: push notifications stay disabled in this build")

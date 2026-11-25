@@ -69,7 +69,7 @@ jobs:
           grep -nE "compileSdk|targetSdk|minSdk|signingConfig" "$f"
           grep -qE "targetSdk(Version)?\s*=?\s*36" "$f" || { echo "::error::targetSdk is not 36 in $f"; exit 1; }
           grep -qE "compileSdk(Version)?\s*=?\s*36" "$f" || { echo "::error::compileSdk is not 36 in $f"; exit 1; }
-          grep -q "signingConfigs.release" "$f" || { echo "::error::release signing is not configured in $f"; exit 1; }
+          grep -qE 'signingConfigs\.release|getByName\("release"\)' "$f" || { echo "::error::release signing is not configured in $f"; exit 1; }
 
       - name: Release readiness warning (placeholders)
         run: |
