@@ -36,28 +36,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _initPush();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _askAdsConsent());
-  }
-
-  /// Shown once, only in builds where ads are enabled. Ads never load without a "yes".
-  Future<void> _askAdsConsent() async {
-    if (!AppConfig.adsEnabled || !mounted) return;
-    if (ref.read(settingsProvider).adsAsked) return;
-    final ok = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: const Text('الإعلانات'),
-        content: const Text(
-            'التطبيق مجاني ويعرض إعلانات من Start.io لدعمه. قد تستخدم شبكة الإعلانات معرّف الإعلان وبيانات الجهاز لعرض الإعلانات. لا تظهر إعلانات أثناء الاختبار، ويمكنك تغيير اختيارك في أي وقت من الإعدادات.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('لا أوافق')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('أوافق')),
-        ],
-      ),
-    );
-    if (!mounted) return;
-    await ref.read(settingsProvider.notifier).setAdsConsent(ok ?? false);
   }
 
   /// Only if the user already switched notifications on: listen for taps to open the chat.
@@ -90,6 +68,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Local-only build (no Supabase configured): no community/chat tabs, no bottom bar.
+    if (!AppConfig.supabaseConfigured) return const Scaffold(body: HomeTab());
     final pages = <Widget>[
       const HomeTab(),
       if (_index == 1) const CommunityScreen() else const SizedBox.shrink(),

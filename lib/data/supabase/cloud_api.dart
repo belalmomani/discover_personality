@@ -101,26 +101,7 @@ class SupabaseCloudApi implements CloudApi {
 
   @override
   Future<void> deleteAccount() async {
-    // Storage files are not removed by the SQL cascade, so delete the user's chat images first
-    // (paths are <uid>/<conversation>/<file>; RLS only lets users delete inside their own folder).
-    await _removeMyChatImages();
     await _c.rpc('delete_my_account');
     await _c.auth.signOut();
-  }
-
-  Future<void> _removeMyChatImages() async {
-    final uid = _c.auth.currentUser?.id;
-    if (uid == null) return;
-    final bucket = _c.storage.from('chat-images');
-    const all = SearchOptions(limit: 1000);
-    final paths = <String>[];
-    final folders = await bucket.list(path: uid, searchOptions: all);
-    for (final f in folders) {
-      final files = await bucket.list(path: '$uid/${f.name}', searchOptions: all);
-      for (final o in files) {
-        paths.add('$uid/${f.name}/${o.name}');
-      }
-    }
-    if (paths.isNotEmpty) await bucket.remove(paths);
   }
 }

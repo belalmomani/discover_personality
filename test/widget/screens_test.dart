@@ -62,6 +62,8 @@ void main() {
     expect(find.text('ابدأ الاختبار'), findsOneWidget);
     expect(find.textContaining('لا توجد تقارير بعد'), findsOneWidget);
     expect(_NeverBackend.created, 0);
+    // Local-only build (Supabase not configured): no community/chat tabs.
+    expect(find.byType(NavigationBar), findsNothing);
   });
 
   testWidgets('review screen: calculate button is disabled until every question is answered', (tester) async {

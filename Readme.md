@@ -10,14 +10,14 @@
 - يعمل دون حساب ودون إنترنت؛ تقدم الاختبار يُحفظ تلقائيًا.
 - تقرير عربي محلي + خطة 30 يومًا قابلة للتعديل + سجل ومقارنة.
 - Supabase اختياري (مصادقة + مزامنة + حذف حساب) مع RLS.
-- Start.io: مفعّل في البناء بوضع الاختبار ويتطلب موافقة المستخدم (`ADS_ENABLED` و`STARTIO_TEST_MODE` من متغيرات GitHub).
+- Start.io: بنية جاهزة **معطلة افتراضيًا** (`ADS_ENABLED=false`).
 - ذكاء اصطناعي اختياري عبر خادم وسيط فقط (معطل افتراضيًا).
 
 ## البدء السريع (من الهاتف)
 اقرأ `docs/SETUP.md` ثم `docs/BUILD_APK.md`. باختصار: ارفع المجلد إلى GitHub ← تبويب Actions ← Android build ← Run workflow ← نزّل APK من Artifacts.
 
 ## الأدلة
-`docs/SETUP.md` • `docs/BUILD_APK.md` • `docs/SUPABASE_SETUP.md` • `docs/STARTIO_SETUP.md` • `docs/TESTING.md` • `docs/STATUS.md` (ما نُفذ وما لم يُتحقق منه) • `docs/PLAY_STORE.md` (النشر) • `PRIVACY.md`
+`docs/SETUP.md` • `docs/BUILD_APK.md` • `docs/SUPABASE_SETUP.md` • `docs/STARTIO_SETUP.md` • `docs/TESTING.md` • `docs/STATUS.md` (ما نُفذ وما لم يُتحقق منه) • `PRIVACY.md`
 
 ## الترخيص
 لم يُحدد ترخيص بعد (انظر `LICENSE`).
