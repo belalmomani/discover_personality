@@ -28,7 +28,7 @@
 Lifestyle (أسلوب الحياة)  — بديل: Education
 
 ## الوسوم / التفاصيل
-- بريد التواصل في صفحة المتجر: ADD_CONTACT_EMAIL_BEFORE_PUBLISHING
+- بريد التواصل في صفحة المتجر: bilalalmomani90@gmail.com
 - رابط سياسة الخصوصية: رابط الصفحة `privacy-policy.html` بعد رفعها على موقعك
 
 ## مواد المتجر

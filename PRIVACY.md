@@ -68,7 +68,9 @@
 
 ## 11) التواصل
 
-البريد: ADD_CONTACT_EMAIL_BEFORE_PUBLISHING
+- المطوّر: بلال المومني
+- البريد: bilalalmomani90@gmail.com
+- الهاتف: ‎+962 77 641 4047
 
 ## 12) تنبيه
 
