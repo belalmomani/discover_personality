@@ -5,7 +5,20 @@
 ٢- اسم المطوّر وبريد التواصل الحقيقي. نفّذ: `python3 store/fill_placeholders.py --email you@example.com --name "اسمك"`
 ٣- ارفع `store/web/privacy-policy.html` و`store/web/delete-account.html` على موقعك (يمكن InfinityFree) وانسخ الرابطين.
 ٤- أضف أسرار GitHub: `ANDROID_KEYSTORE_*` (التوقيع). احفظ نسخة احتياطية من ملف المفتاح وكلمات سره خارج GitHub.
-٥- أنشئ الأيقونة وFeature graphic ولقطات الشاشة (انظر `listing_ar.md`).
+٥- الأيقونة وFeature graphic جاهزتان في `store/assets/`. المتبقي لقطات الشاشة من هاتفك (انظر `listing_ar.md`).
+
+## أ-٢) الإعلانات (إلزامية)
+١- معرّف Start.io المعتمد في المشروع: `210411777` (مضبوط افتراضيًا في `tool/patch_android.py`). تأكد من إضافة تطبيقك في لوحة Start.io بحزمة `app.discover.discover_personality`.
+٢- يمكنك أيضًا إضافته كسر GitHub باسم `STARTIO_APP_ID` (اختياري الآن).
+٣- أضف متغيرين في Variables (وليس Secrets): `PLAY_ADS_ENABLED` = `true`، و`STARTIO_PRODUCTION` = `true` (للنسخة المنشورة فقط؛ بدونه تبقى إعلانات تجريبية).
+٤- إن كان السر فارغًا يستعمل البناء المعرّف الافتراضي أعلاه.
+٥- بعد البناء راجع أذونات الـ manifest، وأجب نماذج Ads وData safety وAdvertising ID كما في `play_console_answers.md`.
+
+## أ-٣) الموافقة الأوروبية (التوزيع في كل الدول)
+١- نافذة الموافقة تظهر عند أول تشغيل في الاتحاد الأوروبي وبريطانيا وسويسرا (والمناطق التي لا يُعرف فيها البلد)، وتحدَّد المنطقة من إعدادات الجهاز دون إذن موقع.
+٢- جرّب على هاتفك: غيّر منطقة الجهاز إلى ألمانيا وافتح التطبيق، فيجب أن تظهر النافذة قبل أي إعلان، ويظهر خيار الإعلانات في «الإعدادات والخصوصية».
+٣- راجع في ناتج خطوة «Print merged manifest permissions» قسم providers: إن ظهر provider لمكتبة Start.io يهيّئها تلقائيًا عند فتح التطبيق، فهذا يعني جمع بيانات قبل الموافقة، وأرسل لي الناتج لأعالجه.
+٤- أكمل «Trader status» في Play Console.
 
 ## ب) قبل الرفع
 ١- شغّل الـ workflow وانتظر نجاح `analyze` والاختبارات وبناء AAB.

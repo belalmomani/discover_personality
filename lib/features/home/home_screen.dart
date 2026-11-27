@@ -8,6 +8,7 @@ import '../../app/widgets.dart';
 import '../../core/config.dart';
 import '../../core/utils.dart';
 import '../../data/ads/ad_service.dart';
+import '../../data/ads/consent_region.dart';
 import '../../l10n/strings_ar.dart';
 import '../assessment/intro_screen.dart';
 import '../assessment/question_screen.dart';
@@ -36,6 +37,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _initPush();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeAskAdsConsent());
+  }
+
+  /// EEA/UK/CH (and unknown regions): ask once, before any ad is requested. Both answers are equally easy.
+  Future<void> _maybeAskAdsConsent() async {
+    if (!AppConfig.adsEnabled || !mounted) return;
+    if (ref.read(settingsProvider).adsConsentAsked || !adsConsentRequiredNow()) return;
+    final accepted = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text('الإعلانات وخصوصيتك'),
+        content: const Text(
+            'التطبيق مجاني ويُموَّل بالإعلانات، وتعرضها شبكة Start.io وقد تستخدم معرّف الإعلان وبيانات الجهاز لعرضها وقياسها. '
+            'إن لم توافق فلن تظهر إعلانات ولن تُجمع بيانات إعلانية. يمكنك تغيير اختيارك في أي وقت من «الإعدادات والخصوصية».'),
+        actions: [
+          FilledButton.tonal(onPressed: () => Navigator.pop(ctx, false), child: const Text('لا أوافق')),
+          FilledButton.tonal(onPressed: () => Navigator.pop(ctx, true), child: const Text('أوافق')),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    await ref.read(settingsProvider.notifier).setAdsConsentChoice(accepted == true);
   }
 
   /// Only if the user already switched notifications on: listen for taps to open the chat.

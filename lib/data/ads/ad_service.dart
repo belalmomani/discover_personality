@@ -13,7 +13,8 @@ enum AdPlacement {
 /// Single entry point for ads. Default state: disabled.
 ///
 /// Rules enforced here (and covered by tests):
-/// - nothing is created/loaded unless [enabled] AND the user's consent is true;
+/// - nothing is created/loaded unless [enabled] AND [consent] (= adsPermitted: always outside the EEA/UK/CH, after the
+///   user accepted inside them), so the SDK is never initialised before consent where consent is required;
 /// - never during the assessment;
 /// - interstitials only on leaving the results screen, max [maxInterstitialsPerSession]
 ///   per session and at least [minInterstitialGap] apart;

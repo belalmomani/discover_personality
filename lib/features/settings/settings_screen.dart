@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../core/config.dart';
+import '../../data/ads/consent_region.dart';
 import '../../data/push/push_service.dart';
 import '../auth/auth_screen.dart';
 import '../help/help_screen.dart';
@@ -111,16 +112,16 @@ class SettingsScreen extends ConsumerWidget {
                 onChanged: notifier.setAiConsent,
               ),
             ),
-          if (AppConfig.adsEnabled)
+          if (AppConfig.adsEnabled && adsConsentRequiredNow())
             SectionCard(
               title: 'الإعلانات',
               icon: Icons.campaign_outlined,
               child: SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('السماح بعرض الإعلانات'),
-                subtitle: const Text('لا تظهر إعلانات أثناء الاختبار، ولا تمنع الوصول إلى نتائجك.'),
-                value: settings.adsConsent,
-                onChanged: notifier.setAdsConsent,
+                title: const Text('الموافقة على عرض الإعلانات'),
+                subtitle: const Text('في منطقتك نطلب موافقتك قبل أي إعلان. يمكنك سحبها في أي وقت.'),
+                value: settings.adsConsentAsked && settings.adsConsent,
+                onChanged: notifier.setAdsConsentChoice,
               ),
             ),
           SectionCard(

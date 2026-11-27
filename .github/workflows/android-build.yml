@@ -136,7 +136,18 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           AI_PROXY_URL: ${{ secrets.AI_PROXY_URL }}
+          # Ads are mandatory in the Play build once repository variable PLAY_ADS_ENABLED=true; STARTIO_PRODUCTION=true turns off test ads.
+          PLAY_ADS: ${{ vars.PLAY_ADS_ENABLED }}
+          STARTIO_PROD: ${{ vars.STARTIO_PRODUCTION }}
+          STARTIO_APP_ID: ${{ secrets.STARTIO_APP_ID }}
         run: |
+          ADS=false; TEST=true
+          if [ "$PLAY_ADS" = "true" ]; then
+            [ -z "$STARTIO_APP_ID" ] && echo "STARTIO_APP_ID secret is empty: the project default App ID from tool/patch_android.py is used."
+            ADS=true
+            [ "$STARTIO_PROD" = "true" ] && TEST=false
+          fi
+          echo "Ads in this bundle: ADS_ENABLED=$ADS STARTIO_TEST_MODE=$TEST"
           if [ "$PLAY_SOCIAL" = "true" ]; then
             echo "::warning::PLAY_ENABLE_SOCIAL=true: this bundle includes accounts, chat and sync (privacy policy, Data safety and UGC rules must cover them)."
             DEFS="--dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY --dart-define=AI_PROXY_URL=$AI_PROXY_URL"
@@ -148,8 +159,8 @@ jobs:
             --build-name=1.0.${{ github.run_number }} \
             --build-number=${{ github.run_number }} \
             $DEFS \
-            --dart-define=ADS_ENABLED=false \
-            --dart-define=STARTIO_TEST_MODE=true
+            --dart-define=ADS_ENABLED=$ADS \
+            --dart-define=STARTIO_TEST_MODE=$TEST
 
       - name: Print merged manifest permissions (Data safety / Advertising ID review)
         continue-on-error: true
@@ -157,6 +168,8 @@ jobs:
           m=$(find build/app/intermediates -path "*merged_manifests*" -path "*elease*" -name AndroidManifest.xml | head -1)
           echo "merged manifest: $m"
           grep -o 'uses-permission[^>]*android:name="[^"]*"' "$m" | sed 's/.*android:name=//' | sort -u
+          echo "--- providers (an ad SDK provider that initialises itself at app start would collect data before consent) ---"
+          grep -o '<provider[^>]*android:name="[^"]*"' "$m" | sed 's/.*android:name=//' | sort -u
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4

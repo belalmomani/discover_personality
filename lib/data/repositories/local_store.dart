@@ -13,23 +13,27 @@ class AppSettings {
     this.themeMode = ThemeMode.system,
     this.aiConsent = false,
     this.adsConsent = false,
+    this.adsConsentAsked = false,
     this.onboardingDone = false,
   });
   final ThemeMode themeMode;
   final bool aiConsent;
   final bool adsConsent;
+  final bool adsConsentAsked;
   final bool onboardingDone;
 
   AppSettings copyWith({
     ThemeMode? themeMode,
     bool? aiConsent,
     bool? adsConsent,
+    bool? adsConsentAsked,
     bool? onboardingDone,
   }) =>
       AppSettings(
         themeMode: themeMode ?? this.themeMode,
         aiConsent: aiConsent ?? this.aiConsent,
         adsConsent: adsConsent ?? this.adsConsent,
+        adsConsentAsked: adsConsentAsked ?? this.adsConsentAsked,
         onboardingDone: onboardingDone ?? this.onboardingDone,
       );
 
@@ -37,6 +41,7 @@ class AppSettings {
         'themeMode': themeMode.name,
         'aiConsent': aiConsent,
         'adsConsent': adsConsent,
+        'adsConsentAsked': adsConsentAsked,
         'onboardingDone': onboardingDone,
       };
 
@@ -46,6 +51,7 @@ class AppSettings {
             orElse: () => ThemeMode.system),
         aiConsent: (j['aiConsent'] as bool?) ?? false,
         adsConsent: (j['adsConsent'] as bool?) ?? false,
+        adsConsentAsked: (j['adsConsentAsked'] as bool?) ?? false,
         onboardingDone: (j['onboardingDone'] as bool?) ?? false,
       );
 }

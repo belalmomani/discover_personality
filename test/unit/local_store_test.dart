@@ -61,6 +61,7 @@ void main() {
     final store = await freshStore();
     final s = store.loadSettings();
     expect(s.adsConsent, isFalse);
+    expect(s.adsConsentAsked, isFalse);
     expect(s.aiConsent, isFalse);
   });
 }

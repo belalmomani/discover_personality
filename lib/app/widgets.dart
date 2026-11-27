@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/ads/ad_service.dart';
+import '../data/ads/consent_region.dart';
 import '../data/report/report_content.dart';
 import 'providers.dart';
 
@@ -159,21 +160,23 @@ class AdBanner extends ConsumerStatefulWidget {
 
 class _AdBannerState extends ConsumerState<AdBanner> {
   Widget? _banner;
+  bool _requested = false;
 
-  @override
-  void initState() {
-    super.initState();
-    final ads = ref.read(adServiceProvider);
-    final consent = ref.read(settingsProvider).adsConsent;
-    ads.bannerFor(widget.placement, consent: consent).then((w) {
+  void _load(bool permitted) {
+    if (_requested || !permitted) return;
+    _requested = true;
+    ref.read(adServiceProvider).bannerFor(widget.placement, consent: true).then((w) {
       if (mounted && w != null) setState(() => _banner = w);
     }).catchError((Object _) {});
   }
 
   @override
   Widget build(BuildContext context) {
+    // Re-evaluated when the consent choice changes (the prompt may be answered after this widget first appears).
+    final permitted = adsPermitted(ref.watch(settingsProvider));
+    _load(permitted);
     final b = _banner;
-    if (b == null) return const SizedBox.shrink();
+    if (b == null || !permitted) return const SizedBox.shrink();
     return SafeArea(top: false, child: SizedBox(height: 60, child: Center(child: b)));
   }
 }

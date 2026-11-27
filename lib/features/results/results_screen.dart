@@ -5,6 +5,7 @@ import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../core/utils.dart';
 import '../../data/ads/ad_service.dart';
+import '../../data/ads/consent_region.dart';
 import '../../data/ai/ai_explainer.dart';
 import '../../data/report/report_builder.dart';
 import '../../data/report/report_content.dart';
@@ -35,7 +36,7 @@ class ResultsScreen extends ConsumerWidget {
 
     // Captured now so the pop callback never touches `ref` after disposal.
     final ads = ref.read(adServiceProvider);
-    final consent = ref.watch(settingsProvider).adsConsent;
+    final consent = adsPermitted(ref.watch(settingsProvider));
 
     return PopScope(
       canPop: true,

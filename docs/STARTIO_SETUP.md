@@ -17,5 +17,5 @@
 - لم تُجرَّب الإعلانات على جهاز. الإعدادات الاختيارية Return/Splash ads معطلة في الـ manifest.
 
 ## App ID الحالي
-`209978600` هو المعرّف الافتراضي في `tool/patch_android.py` (المعرّف ليس سريًا لأنه يظهر داخل الـ APK). يمكن تجاوزه بسر `STARTIO_APP_ID`.
+`210411777` هو المعرّف الافتراضي في `tool/patch_android.py` (المعرّف ليس سريًا لأنه يظهر داخل الـ APK). يمكن تجاوزه بسر `STARTIO_APP_ID`.
 للتفعيل غيّر في `.github/workflows/android-build.yml` السطر `--dart-define=ADS_ENABLED=false` إلى `true`، وأبقِ `STARTIO_TEST_MODE=true` حتى تتأكد من ظهور إعلانات الاختبار.

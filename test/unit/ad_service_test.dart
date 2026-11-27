@@ -64,7 +64,7 @@ void main() {
     expect(backend.inits + backend.banners + backend.preloads + backend.shows, 0);
   });
 
-  test('enabled but no user consent: nothing is requested', () async {
+  test('enabled but not permitted (consent required and not given): nothing is requested', () async {
     final s = make(enabled: true);
     expect(await s.bannerFor(AdPlacement.homeBanner, consent: false), isNull);
     expect(await s.maybeShowInterstitial(AdPlacement.resultsExitInterstitial, consent: false), isFalse);
